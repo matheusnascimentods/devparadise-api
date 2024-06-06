@@ -1,0 +1,6 @@
+.env
+node_modules
+public/images/devs/*.png
+public/images/devs/*.jpg
+public/images/projects/*.png
+public/images/projects/*.jpg
