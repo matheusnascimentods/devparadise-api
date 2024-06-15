@@ -18,7 +18,7 @@ router.post('/', [
 ], checkBody, controller.post);
 
 router.post('/login', [
-    body('email').notEmpty(),
+    body('email').isEmail(),
     body('password').notEmpty()
 ], checkBody, controller.login);
 
@@ -51,7 +51,7 @@ router.patch("/:id", [
 ], verifyToken, verifyId, checkBody, controller.edit);
 
 //DELETE
-router.delete('/delete', verifyToken, controller.delete);
+router.delete('/', verifyToken, controller.delete);
 
 router.delete('/project/:id', verifyToken, verifyId, controller.deleteProject);
 

@@ -20,8 +20,10 @@ app.use(express.static('public'));
 
 //Routes
 const DevRoutes = require('./routes/DevRoutes');
-
 app.use('/dev', DevRoutes);
+
+const ContractorRoutes = require('./routes/ContractorRoutes');
+app.use('/contractor', ContractorRoutes);
 
 app.listen(port, () => {
     console.log(`Running in port ${port}`);
