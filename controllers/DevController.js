@@ -6,8 +6,8 @@ const Dev = require('../models/Dev');
 //Helpers
 const createUserToken = require('../helpers/create-user-token');
 const getToken = require('../helpers/get-token');
-const getDevByToken = require('../helpers/get-dev-by-token');
 const getProjectIndex = require('../helpers/get-project-index');
+const getUserByToken = require('../helpers/get-user-by-token');
 
 module.exports = class DevController {
 
@@ -64,7 +64,7 @@ module.exports = class DevController {
         }
     }
 
-    static async login(req, res) {
+    static async login(req, res) {''
           
         let {email, password} = req.body;
 
@@ -123,7 +123,7 @@ module.exports = class DevController {
 
         //Get user
         let token = getToken(req);
-        let dev = await getDevByToken(token);
+        let dev = await getUserByToken(token, Dev);
 
         dev.projects = [...dev.projects, project];
 
@@ -147,7 +147,7 @@ module.exports = class DevController {
         let { username, email, phone } = req.body;
 
         let token = getToken(req);        
-        let dev = await getDevByToken(token);
+        let dev = await getUserByToken(token, Dev);
 
         //Username validation
         let checkUsername = await Dev.findOne({ username: username });
@@ -198,7 +198,7 @@ module.exports = class DevController {
 
         //Get by token
         let token = getToken(req);
-        let dev = await getDevByToken(token);
+        let dev = await getUserByToken(token, Dev);
 
         //Find project
         let index = getProjectIndex(dev.projects, id, res);
@@ -251,7 +251,7 @@ module.exports = class DevController {
 
         //Get dev
         let token = getToken(req);
-        let dev = await getDevByToken(token);
+        let dev = await getUserByToken(token, Dev);
 
         //Check password
         let checkPassword = await bcrypt.compare(password, dev.password);
@@ -289,7 +289,7 @@ module.exports = class DevController {
         image = req.file.filename;
 
         let token = getToken(req);        
-        let dev = await getDevByToken(token);
+        let dev = await getUserByToken(token, Dev);
 
         let imageName = req.file.filename;
         dev.image = imageName;
@@ -311,7 +311,7 @@ module.exports = class DevController {
 
     static async delete(req, res) {
         let token = getToken(req);
-        let dev = await getDevByToken(token);
+        let dev = await getUserByToken(token, Dev);
 
         await Dev.findByIdAndDelete(dev._id);
 
@@ -323,7 +323,7 @@ module.exports = class DevController {
 
         //Get by token
         let token = getToken(req);
-        let dev = await getDevByToken(token);
+        let dev = await getUserByToken(token, Dev);
 
         let index = getProjectIndex(dev.projects, id, res);
 

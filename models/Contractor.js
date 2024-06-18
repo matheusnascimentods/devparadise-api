@@ -17,6 +17,9 @@ const Contractor = mongoose.model(
             type: String,
             required: true
         },
+        linkedin: {
+            type: String,
+        },
         cnpj: {
             type: Number,
             required: true
@@ -24,6 +27,7 @@ const Contractor = mongoose.model(
         image: {
             type: String,
         },
+        favoriteDevs: [String],
         password: {
             type: String,
             required: true

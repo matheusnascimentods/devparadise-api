@@ -9,6 +9,11 @@ const imageStorage = multer.diskStorage({
         if(req.baseUrl.includes('dev')) {
             folder = "devs";
         }
+
+        if(req.baseUrl.includes('contractor')){
+            folder = "contractors";
+        }
+
         cb(null, `public/images/${folder}`);
     },
     filename: (req, file, cb) => {
