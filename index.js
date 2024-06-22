@@ -7,8 +7,6 @@ const port = process.env.API_PORT;
 const app = express();
 
 //Config JSON response
-
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -21,6 +19,9 @@ app.use(express.static('public'));
 //Routes
 const DevRoutes = require('./routes/DevRoutes');
 app.use('/dev', DevRoutes);
+
+const ProjectRoutes = require('./routes/ProjectRoutes');
+app.use('/project', ProjectRoutes);
 
 const ContractorRoutes = require('./routes/ContractorRoutes');
 app.use('/contractor', ContractorRoutes);

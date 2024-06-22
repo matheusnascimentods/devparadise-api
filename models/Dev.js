@@ -32,22 +32,6 @@ const Dev = mongoose.model(
             type: String,
             required: true
         },
-        projects: [{
-            title: {
-                type: String,
-                required: true
-            }, 
-            description: {
-                type: String,
-                required: true
-            },
-            repository: {
-                type: String,
-            },
-            images: {
-                type: Array
-            }
-        }, {timestamps: true}]
     }, {timestamps: true}),
 );
 

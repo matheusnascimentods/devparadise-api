@@ -22,13 +22,10 @@ router.post('/login', [
     body('password').notEmpty()
 ], checkBody, controller.login);
 
-router.post('/project', [
-    body('title').notEmpty(),
-    body('description').notEmpty(),
-], verifyToken, checkBody, controller.addProject);
-
 //GET
 router.get("/checkuser", controller.checkUser);
+
+router.get("/get-projects/:id", verifyId, controller.getDevProjects);
 
 router.get("/", controller.get);
 
@@ -42,8 +39,6 @@ verifyToken, checkBody, controller.changePassword);
 
 router.patch("/change-pfp/:id", verifyToken, verifyId, imageUpload.single("image"), controller.changePfp);
 
-router.patch("/project/:id", verifyToken, verifyId, imageUpload.array("images"), controller.editProject);
-
 router.patch("/:id", [
     body('username').isLength({ min: 5 }).trim().escape(),
     body('email').isEmail().normalizeEmail(),
@@ -52,7 +47,5 @@ router.patch("/:id", [
 
 //DELETE
 router.delete('/', verifyToken, controller.delete);
-
-router.delete('/project/:id', verifyToken, verifyId, controller.deleteProject);
 
 module.exports = router;

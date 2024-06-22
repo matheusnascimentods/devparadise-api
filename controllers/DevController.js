@@ -6,8 +6,8 @@ const Dev = require('../models/Dev');
 //Helpers
 const createUserToken = require('../helpers/create-user-token');
 const getToken = require('../helpers/get-token');
-const getProjectIndex = require('../helpers/get-project-index');
 const getUserByToken = require('../helpers/get-user-by-token');
+const Project = require('../models/Project');
 
 module.exports = class DevController {
 
@@ -53,7 +53,6 @@ module.exports = class DevController {
             cpf: cpf,
             phone: phone,
             password: passwordHash,
-            projects: []
         });
 
         try {
@@ -95,6 +94,20 @@ module.exports = class DevController {
         return res.status(200).json({ data: data });
     }
 
+    static async getDevProjects(req, res) {
+        let { id } = req.params;
+
+        let dev = await Dev.findOne({ _id: id });
+
+        if(!dev) {
+            return res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+
+        let projects = await Project.find({ devId: dev._id.toString() });
+
+        return res.json({ data: projects });
+    }
+
     static async checkUser(req, res) {
         var currentUser;
 
@@ -109,37 +122,6 @@ module.exports = class DevController {
         }
 
         res.status(200).send(currentUser);
-    }
-
-    static async addProject(req, res) {
-
-        let { title, description, repository } = req.body;
-
-        let project = {
-            title: title,
-            description: description,
-            repository: repository
-        }
-
-        //Get user
-        let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
-
-        dev.projects = [...dev.projects, project];
-
-        try {
-            let updatedData = await Dev.findOneAndUpdate(
-                { _id: dev._id },
-                { $set: dev },
-                { new: true },
-            );
-
-            updatedData.password = undefined;
-            
-            res.json({ message: 'Operação realizada com sucesso!', data: updatedData });
-        } catch (error) {
-            res.status(500).json({ message: error })   
-        }
     }
 
     static async edit(req, res) {
@@ -188,60 +170,6 @@ module.exports = class DevController {
             return res.json({ message: 'Operação realizada com sucesso!', data: updatedData });
         } catch (error) {
             return res.status(500).json({ message: error})
-        }
-    }
-
-    static async editProject(req, res) {
-
-        //Get and check id
-        let { id } = req.params;
-
-        //Get by token
-        let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
-
-        //Find project
-        let index = getProjectIndex(dev.projects, id, res);
-
-        let { title, description, repository } = req.body;
-        let files = req.files;
-
-        if(!title || !description || !files) {
-            return res.status(422).json({ message: 'Preencha todos os campos!' });
-        }
-
-        let images = [];
-
-        if (files) {
-            files.map((file) => {
-                images.push(file.filename)
-            });
-        }
-
-        let project = {
-            title: title,
-            description: description,
-            repository: repository,
-            images: [...images],
-        }
-
-        dev.projects[index] = project;
-
-        try {
-            let updatedData = await Dev.findOneAndUpdate(
-                { _id: dev._id },
-                { $set: dev },
-                { new: true },
-            );
-
-            updatedData.password = undefined;
-            
-            res.json({
-                message: 'Operação realizada com sucesso!',
-                data: updatedData,
-            });
-        } catch (error) {
-            res.status(500).json({ message: error });
         }
     }
 
@@ -317,21 +245,4 @@ module.exports = class DevController {
 
         return res.status(204).json({ message: 'Exclusão realizada com sucesso' });
     }
-
-    static async deleteProject(req, res) {
-        let { id } = req.params;
-
-        //Get by token
-        let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
-
-        let index = getProjectIndex(dev.projects, id, res);
-
-        dev.projects.splice(index, 1);
-
-        await Dev.findByIdAndUpdate(dev._id, dev);
-
-        return res.status(204).json({ message: 'Exclusão realizada com sucesso' });
-    }
-
 }
