@@ -23,7 +23,7 @@ router.post('/login', [
 ], checkBody, controller.login);
 
 //GET
-router.get("/checkuser", controller.checkUser);
+router.get("/get-user", controller.getUserByToken);
 
 router.get("/get-projects/:id", verifyId, controller.getDevProjects);
 
@@ -39,11 +39,11 @@ verifyToken, checkBody, controller.changePassword);
 
 router.patch("/change-pfp/:id", verifyToken, verifyId, imageUpload.single("image"), controller.changePfp);
 
-router.patch("/:id", [
+router.patch("/", [
     body('username').isLength({ min: 5 }).trim().escape(),
     body('email').isEmail().normalizeEmail(),
     body('phone').isMobilePhone(),
-], verifyToken, verifyId, checkBody, controller.edit);
+], verifyToken, checkBody, controller.edit);
 
 //DELETE
 router.delete('/', verifyToken, controller.delete);

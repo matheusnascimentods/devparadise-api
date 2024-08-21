@@ -12,7 +12,7 @@ const Project = require('../models/Project');
 module.exports = class DevController {
 
     static async post(req, res) {
-        let {name, username, email, cpf, phone, password} = req.body;
+        let {name, username, email, cpf, phone, description, password} = req.body;
 
         //Check if user exists
         let cpfExists = await Dev.findOne({ cpf: cpf});
@@ -52,6 +52,7 @@ module.exports = class DevController {
             email: email, 
             cpf: cpf,
             phone: phone,
+            description: description,
             password: passwordHash,
         });
 
@@ -108,25 +109,18 @@ module.exports = class DevController {
         return res.json({ data: projects });
     }
 
-    static async checkUser(req, res) {
-        var currentUser;
+    static async getUserByToken (req, res) {
 
-        if(req.headers.authorization) {
-            let token = getToken(req);
-            let decoded = jwt.verify(token, 'nossosecret');
+        let token = getToken(req);
+        let dev = await getUserByToken(token, Dev);
 
-            currentUser = await Dev.findById(decoded.id);
-            currentUser.password = null;
-        } else {
-            currentUser = null;
-        }
+        let projects = await Project.find({ devId: dev._id.toString() });
 
-        res.status(200).send(currentUser);
+        return res.json({ dev: dev, projects: projects})
     }
 
     static async edit(req, res) {
-        let { id } = req.params;
-        let { username, email, phone } = req.body;
+        let { username, email, phone, description, skils, github, linkedin } = req.body;
 
         let token = getToken(req);        
         let dev = await getUserByToken(token, Dev);
@@ -148,15 +142,11 @@ module.exports = class DevController {
         }
 
         dev.email = email;
-
-        //Validate phone
-        let checkPhone = await Dev.findOne({ phone: phone });
-
-        if (dev.phone.toString() !== phone && checkPhone) {
-            return res.status(422).json({ message: 'Telefone em uso'});
-        }
-
+        dev.description = description;
+        dev.skils = skils;
         dev.phone = phone;
+        dev.github = github;
+        dev.linkedin = linkedin;
 
         try {
             let updatedData = await Dev.findOneAndUpdate(

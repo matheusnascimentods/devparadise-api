@@ -28,6 +28,18 @@ const Dev = mongoose.model(
         image: {
             type: String,
         },
+        description: {
+            type: String,
+        },
+        github: {
+            type: String
+        }, 
+        linkedin: {
+            type: String
+        },
+        skils: {
+            type: [String],
+        },
         password: {
             type: String,
             required: true
