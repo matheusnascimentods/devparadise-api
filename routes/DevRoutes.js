@@ -37,7 +37,7 @@ router.patch("/change-password", [
 ],
 verifyToken, checkBody, controller.changePassword);
 
-router.patch("/change-pfp/:id", verifyToken, verifyId, imageUpload.single("image"), controller.changePfp);
+router.patch("/change-pfp", verifyToken, imageUpload.single("image"), controller.changePfp);
 
 router.patch("/", [
     body('username').isLength({ min: 5 }).trim().escape(),

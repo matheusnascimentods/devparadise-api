@@ -196,8 +196,6 @@ module.exports = class DevController {
     }
 
     static async changePfp(req, res) {
-        let { id } = req.params;
-
         let image = '';
 
         if(!req.file) {
