@@ -12,7 +12,7 @@ const Project = require('../models/Project');
 module.exports = class DevController {
 
     static async post(req, res) {
-        let {name, username, email, cpf, phone, description, password} = req.body;
+        let {name, username, email, cpf, phone, description, skils, password} = req.body;
 
         //Check if user exists
         let cpfExists = await Dev.findOne({ cpf: cpf});
@@ -50,6 +50,7 @@ module.exports = class DevController {
             name: name,
             username: username,
             email: email, 
+            skils: skils,
             cpf: cpf,
             phone: phone,
             description: description,
@@ -120,7 +121,7 @@ module.exports = class DevController {
     }
 
     static async edit(req, res) {
-        let { username, email, phone, description, skils, github, linkedin } = req.body;
+        let { name, username, email, phone, description, skils, github, linkedin } = req.body;
 
         let token = getToken(req);        
         let dev = await getUserByToken(token, Dev);
@@ -141,6 +142,7 @@ module.exports = class DevController {
             return res.status(422).json({ message: 'E-mail em uso'});
         }
 
+        dev.name = name;
         dev.email = email;
         dev.description = description;
         dev.skils = skils;

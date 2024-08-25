@@ -8,10 +8,7 @@ const checkBody = require('../helpers/check-body');
 const { imageUpload } = require('../helpers/image-upload');
 
 //POST
-router.post('/', [
-    body('title').notEmpty(),
-    body('description').notEmpty(),
-], verifyToken, checkBody, controller.addProject)
+router.post('/', verifyToken, imageUpload.array("images"), controller.addProject)
 
 //GET
 router.get('/', controller.get);

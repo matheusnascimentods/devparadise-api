@@ -13,14 +13,34 @@ module.exports = class ProjectController {
 
     static async addProject(req, res) {
         let {title, description, repository} = req.body;
+        let files = req.files;
+
+        if (!title) {
+            return res.status(422).json({ message: 'Informe o nome do projeto!' });
+        }
+
+        if (!description) {
+            return res.status(422).json({ message: 'Informe a descrição do projeto!' });
+        }
 
         let token = getToken(req);
         let dev = await getUserByToken(token, Dev);
+
+        let images = [];
+        if (files) {
+            files.map((file) => {
+                images.push(file.filename)
+            });
+        }
+
+        console.log(req.files);
+        
 
         let project = new Project({
             title: title,
             description: description,
             repository: repository,
+            images: images,
             devId: dev._id.toString(),
         });
 
@@ -65,6 +85,9 @@ module.exports = class ProjectController {
 
         let { title, description, repository } = req.body;
         let files = req.files;
+
+        console.log(files);
+        
 
         if(!title || !description) {
             return res.status(422).json({ message: 'Preencha todos os campos!' });
