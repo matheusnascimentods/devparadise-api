@@ -110,6 +110,14 @@ module.exports = class DevController {
         return res.json({ data: projects });
     }
 
+    static async myProjects(req, res) {
+        let token = getToken(req);
+        let dev = await getUserByToken(token, Dev);
+        let projects = await Project.find({ devId: dev._id.toString() });
+
+        return res.json({ devId: dev._id.toString(), projects: projects})
+    }
+
     static async getUserByToken (req, res) {
 
         let token = getToken(req);

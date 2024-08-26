@@ -26,6 +26,8 @@ router.post('/login', [
 //GET
 router.get("/get-user", controller.getUserByToken);
 
+router.get("/my-projects", verifyToken, controller.myProjects);
+
 router.get("/get-projects/:id", verifyId, controller.getDevProjects);
 
 router.get("/", controller.get);
