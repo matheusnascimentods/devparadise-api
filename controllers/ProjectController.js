@@ -31,10 +31,7 @@ module.exports = class ProjectController {
             files.map((file) => {
                 images.push(file.filename)
             });
-        }
-
-        console.log(req.files);
-        
+        }  
 
         let project = new Project({
             title: title,
@@ -85,10 +82,7 @@ module.exports = class ProjectController {
 
         let { title, description, repository } = req.body;
         let files = req.files;
-
-        console.log(files);
         
-
         if(!title || !description) {
             return res.status(422).json({ message: 'Preencha todos os campos!' });
         }
@@ -141,6 +135,6 @@ module.exports = class ProjectController {
 
         await Project.findByIdAndDelete(project._id);
 
-        return res.status(204).json({ message: 'Exclusão realizada com sucesso' });
+        return res.status(200).json({ message: 'Exclusão realizada com sucesso' });
     }
 }
