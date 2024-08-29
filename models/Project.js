@@ -20,6 +20,9 @@ const Project = mongoose.model(
             type: String,
             required: true,
         },
+        technologies: {
+            type: [String]
+        },
         images: {
             type: Array
         }

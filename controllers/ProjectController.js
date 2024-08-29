@@ -12,8 +12,11 @@ const getUserByToken = require('../helpers/get-user-by-token');
 module.exports = class ProjectController {
 
     static async addProject(req, res) {
-        let {title, description, repository} = req.body;
+        let {title, description, repository, technologies} = req.body;
         let files = req.files;
+
+        console.log(technologies);
+        
 
         if (!title) {
             return res.status(422).json({ message: 'Informe o nome do projeto!' });
@@ -33,20 +36,21 @@ module.exports = class ProjectController {
             });
         }  
 
-        let project = new Project({
-            title: title,
-            description: description,
-            repository: repository,
-            images: images,
-            devId: dev._id.toString(),
-        });
+        // let project = new Project({
+        //     title: title,
+        //     description: description,
+        //     repository: repository,
+        //     images: images,
+        //     technologies: technologies,
+        //     devId: dev._id.toString(),
+        // });
 
-        try {
-            let data = await project.save();
-            return res.status(201).json({ data: data });
-        } catch (error) {
-            res.status(500).json({ message: error });
-        }
+        // try {
+        //     let data = await project.save();
+        //     return res.status(201).json({ data: data });
+        // } catch (error) {
+        //     res.status(500).json({ message: error });
+        // }
     }
 
     static async get(req, res) {
