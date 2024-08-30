@@ -36,21 +36,21 @@ module.exports = class ProjectController {
             });
         }  
 
-        // let project = new Project({
-        //     title: title,
-        //     description: description,
-        //     repository: repository,
-        //     images: images,
-        //     technologies: technologies,
-        //     devId: dev._id.toString(),
-        // });
+        let project = new Project({
+            title: title,
+            description: description,
+            repository: repository,
+            images: images,
+            technologies: technologies,
+            devId: dev._id.toString(),
+        });
 
-        // try {
-        //     let data = await project.save();
-        //     return res.status(201).json({ data: data });
-        // } catch (error) {
-        //     res.status(500).json({ message: error });
-        // }
+        try {
+            let data = await project.save();
+            return res.status(201).json({ data: data });
+        } catch (error) {
+            res.status(500).json({ message: error });
+        }
     }
 
     static async get(req, res) {
