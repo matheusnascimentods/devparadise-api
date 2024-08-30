@@ -84,7 +84,7 @@ module.exports = class ProjectController {
             return res.status(401).json({ message: 'Algo deu errado!' });
         }
 
-        let { title, description, repository } = req.body;
+        let { title, description, repository, technologies } = req.body;
         let files = req.files;
         
         if(!title || !description) {
@@ -103,6 +103,7 @@ module.exports = class ProjectController {
         project.description = description;
         project.repository = repository;
         project.images = images;
+        project.technologies = technologies;
 
         try {
             let data = await Project.findOneAndUpdate(
