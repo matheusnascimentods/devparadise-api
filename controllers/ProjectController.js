@@ -15,9 +15,6 @@ module.exports = class ProjectController {
         let {title, description, repository, technologies} = req.body;
         let files = req.files;
 
-        console.log(technologies);
-        
-
         if (!title) {
             return res.status(422).json({ message: 'Informe o nome do projeto!' });
         }
@@ -97,6 +94,10 @@ module.exports = class ProjectController {
             files.map((file) => {
                 images.push(file.filename)
             });
+        } 
+        
+        if (!req.files || req.files.length === 0) {
+            images = project.images;            
         }
 
         project.title = title;
@@ -111,7 +112,7 @@ module.exports = class ProjectController {
                 { $set: project },
                 { new: true },
             );
-
+            
             res.json({
                 message: 'Operação realizada com sucesso!',
                 data: data,
