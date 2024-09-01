@@ -40,15 +40,7 @@ router.patch("/change-password", [
 ],
 verifyToken, checkBody, controller.changePassword);
 
-router.patch("/change-pfp", verifyToken, imageUpload.single("image"), controller.changePfp);
-
-router.patch("/", [
-    body('name').notEmpty(),
-    body('description').notEmpty(),
-    body('username').isLength({ min: 5 }).trim().escape(),
-    body('email').isEmail().normalizeEmail(),
-    body('phone').isMobilePhone(),
-], verifyToken, checkBody, controller.edit);
+router.patch("/", verifyToken, imageUpload.single("image"), controller.edit);
 
 //DELETE
 router.delete('/', verifyToken, controller.delete);

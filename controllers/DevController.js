@@ -130,10 +130,24 @@ module.exports = class DevController {
 
     static async edit(req, res) {
         let { name, username, email, phone, description, skils, github, linkedin } = req.body;
-
+        
         let token = getToken(req);        
         let dev = await getUserByToken(token, Dev);
 
+        //Validation
+        if (!name) {
+            return res.status(422).json({ message: 'Informe o seu nome!' });
+        }
+        if (!username) {
+            return res.status(422).json({ message: 'Informe o seu username!' });
+        }
+        if (!email) {
+            return res.status(422).json({ message: 'Informe o seu email!' });
+        }
+        if (!description) {
+            return res.status(422).json({ message: 'Informe a sua descrição!' });
+        }
+        
         //Username validation
         let checkUsername = await Dev.findOne({ username: username });
 
@@ -150,6 +164,13 @@ module.exports = class DevController {
             return res.status(422).json({ message: 'E-mail em uso'});
         }
 
+        let image = '';
+        if (req.file) {
+            image = req.file.filename
+        } else {
+            image = dev.image;
+        }
+
         dev.name = name;
         dev.email = email;
         dev.description = description;
@@ -157,6 +178,7 @@ module.exports = class DevController {
         dev.phone = phone;
         dev.github = github;
         dev.linkedin = linkedin;
+        dev.image = image;
 
         try {
             let updatedData = await Dev.findOneAndUpdate(
@@ -203,36 +225,6 @@ module.exports = class DevController {
         await Dev.findByIdAndUpdate(dev._id, dev);
 
         return res.status(204).json({ data: 'Operação realizada com sucesso!'});
-    }
-
-    static async changePfp(req, res) {
-        let image = '';
-
-        if(!req.file) {
-            return res.status(422).json({ message: 'Envie um arquivo de imagem!' });
-        }
-
-        image = req.file.filename;
-
-        let token = getToken(req);        
-        let dev = await getUserByToken(token, Dev);
-
-        let imageName = req.file.filename;
-        dev.image = imageName;
-        
-        try {
-            let updatedData = await Dev.findOneAndUpdate(
-                { _id: dev._id },
-                { $set: dev },
-                { new: true },
-            );
-
-            updatedData.password = undefined;
-
-            return res.json({ message: 'Operação realizada com sucesso!', data: updatedData });
-        } catch (error) {
-            return res.status(500).json({ message: error})
-        }
     }
 
     static async delete(req, res) {
