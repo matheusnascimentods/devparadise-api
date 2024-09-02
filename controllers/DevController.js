@@ -89,7 +89,13 @@ module.exports = class DevController {
 
         if (id) {
             let data = await Dev.findOne({ _id: id });
-            return res.status(200).json({ data: data });            
+
+            if (!data) {
+                return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
+            }
+
+            let projects = await Project.find({ devId: data._id.toString() });
+            return res.status(200).json({ data: data, projects: projects });            
         }
 
         let username = req.query.username;
@@ -101,27 +107,14 @@ module.exports = class DevController {
                 return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
             }
 
-            return res.status(200).json({ data: data });            
+            let projects = await Project.find({ devId: data._id.toString() });          
+            return res.status(200).json({ data: data, projects: projects });            
         }
 
         let data = await Dev.find().sort('-createdAt');
         return res.status(200).json({ data: data });
     }
-
-    static async getDevProjects(req, res) {
-        let { id } = req.params;
-
-        let dev = await Dev.findOne({ _id: id });
-
-        if(!dev) {
-            return res.status(404).json({ message: 'Usuário não encontrado' });
-        }
-
-        let projects = await Project.find({ devId: dev._id.toString() });
-
-        return res.json({ data: projects });
-    }
-
+    
     static async myProjects(req, res) {
         let token = getToken(req);
         let dev = await getUserByToken(token, Dev);
