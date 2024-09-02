@@ -92,6 +92,18 @@ module.exports = class DevController {
             return res.status(200).json({ data: data });            
         }
 
+        let username = req.query.username;
+
+        if (username) {
+            let data = await Dev.findOne({ username: username });
+
+            if (!data) {
+                return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
+            }
+
+            return res.status(200).json({ data: data });            
+        }
+
         let data = await Dev.find().sort('-createdAt');
         return res.status(200).json({ data: data });
     }
