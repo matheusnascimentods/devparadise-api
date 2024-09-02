@@ -113,6 +113,15 @@ module.exports = class DevController {
     static async myProjects(req, res) {
         let token = getToken(req);
         let dev = await getUserByToken(token, Dev);
+
+        let title = req.query.title;
+
+        if (title) {
+            title = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            let data = await Project.find({ title: { $regex: title, $options: 'i' } });
+            return res.status(200).json({ data: data, total: data.length });
+        }
+
         let projects = await Project.find({ devId: dev._id.toString() });
 
         return res.json({ devId: dev._id.toString(), projects: projects})

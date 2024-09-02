@@ -58,6 +58,13 @@ module.exports = class ProjectController {
             return res.status(200).json({ data: data });            
         }
 
+        let title = req.query.title;
+
+        if (title) {
+            let data = await Project.find({ title: { $regex: title, $options: 'i' } });
+            return res.status(200).json({ data: data });
+        }
+
         let data = await Project.find().sort('-createdAt');
         return res.status(200).json({ data: data });
     }
