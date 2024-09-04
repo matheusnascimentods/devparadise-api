@@ -11,6 +11,7 @@ const { imageUpload } = require('../helpers/image-upload');
 router.post('/', verifyToken, imageUpload.array("images"), controller.addProject)
 
 //GET
+router.get('/get-images/:id', verifyId, controller.getImages);
 router.get('/', controller.get);
 
 //PATCH

@@ -69,6 +69,18 @@ module.exports = class ProjectController {
         return res.status(200).json({ data: data });
     }
 
+    static async getImages(req, res) {
+        let {id} = req.params;
+
+        let project = await Project.findById(id);
+
+        if(!project) {
+            return res.status(404).json({ message: 'Projeto não encontrado!' });
+        }
+
+        return res.status(200).json({ images: project.images });
+    }
+
     static async editProject(req, res) {
         
         //Get and check id
