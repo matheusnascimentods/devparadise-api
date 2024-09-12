@@ -111,6 +111,13 @@ module.exports = class DevController {
             return res.status(200).json({ data: data, projects: projects });            
         }
 
+        let name = req.query.name;
+
+        if (name) {
+            let data = await Dev.find({ name: { $regex: name, $options: 'i' } });
+            return res.status(200).json({ data: data, total: data.length });
+        }
+
         let data = await Dev.find().sort('-createdAt');
         return res.status(200).json({ data: data });
     }

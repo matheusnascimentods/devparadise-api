@@ -62,7 +62,7 @@ module.exports = class ProjectController {
 
         if (title) {
             let data = await Project.find({ title: { $regex: title, $options: 'i' } });
-            return res.status(200).json({ data: data });
+            return res.status(200).json({ data: data, total: data.length });
         }
 
         let data = await Project.find().sort('-createdAt');
