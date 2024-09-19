@@ -28,6 +28,8 @@ router.get("/get-user", controller.getUserByToken);
 
 router.get("/my-projects", verifyToken, controller.myProjects);
 
+router.get("/search", controller.search);
+
 router.get("/", controller.get);
 
 //PATCH

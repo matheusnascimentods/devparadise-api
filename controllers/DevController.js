@@ -121,6 +121,25 @@ module.exports = class DevController {
         let data = await Dev.find().sort('-createdAt');
         return res.status(200).json({ data: data });
     }
+
+    static async search (req, res) {
+        const q = req.query.q;
+
+        if (q) {
+            let data = await Dev.find({
+                $or: [
+                    { name: { $regex: q, $options: 'i' } },
+                    { username: { $regex: q, $options: 'i' } },
+                    { description: { $regex: q, $options: 'i' } },
+                    { skils: { $in: [q] }}
+                ]
+            }).sort('-createdAt');
+
+            return res.status(200).json({ data: data, total: data.length });            
+        } else {
+            return res.status(422).json({ message: 'Informe uma query! '});
+        }
+    }
     
     static async myProjects(req, res) {
         let token = getToken(req);
