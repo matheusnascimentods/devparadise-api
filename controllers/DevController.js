@@ -85,44 +85,6 @@ module.exports = class DevController {
     }
 
     static async get(req, res) {
-        let id = req.query.id;
-
-        if (id) {
-            let data = await Dev.findOne({ _id: id });
-
-            if (!data) {
-                return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
-            }
-
-            let projects = await Project.find({ devId: data._id.toString() });
-            return res.status(200).json({ data: data, projects: projects });            
-        }
-
-        let username = req.query.username;
-
-        if (username) {
-            let data = await Dev.findOne({ username: username });
-
-            if (!data) {
-                return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
-            }
-
-            let projects = await Project.find({ devId: data._id.toString() });          
-            return res.status(200).json({ data: data, projects: projects });            
-        }
-
-        let name = req.query.name;
-
-        if (name) {
-            let data = await Dev.find({ name: { $regex: name, $options: 'i' } });
-            return res.status(200).json({ data: data, total: data.length });
-        }
-
-        let data = await Dev.find().sort('-createdAt');
-        return res.status(200).json({ data: data });
-    }
-
-    static async search (req, res) {
         const q = req.query.q;
 
         if (q) {
@@ -131,16 +93,48 @@ module.exports = class DevController {
                     { name: { $regex: q, $options: 'i' } },
                     { username: { $regex: q, $options: 'i' } },
                     { description: { $regex: q, $options: 'i' } },
-                    { skils: { $in: [q] }}
+                    { skils: { $elemMatch: { $regex: q, $options: 'i' } } }
                 ]
             }).sort('-createdAt');
 
             return res.status(200).json({ data: data, total: data.length });            
-        } else {
-            return res.status(422).json({ message: 'Informe uma query! '});
         }
+
+        let data = await Dev.find().sort('-createdAt');
+        return res.status(200).json({ data: data });
     }
-    
+
+    static async getByUsername(req, res) {
+        let username = req.params.username;
+
+        if (!username) {
+            return res.status(422).json({ message: 'Informe um username!' });
+        }
+
+        let data = await Dev.findOne({ username: username });
+
+        if (!data) {
+            return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
+        }
+
+        let projects = await Project.find({ devId: data._id.toString() });
+        return res.status(200).json({ data: data, projects: projects });   
+    }
+
+    static async getById(req, res) {
+        let id = req.params.id;
+
+        let data = await Dev.findOne({ _id: id });
+        
+        if (!data) {
+            return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
+        }
+
+        let projects = await Project.find({ devId: data._id.toString() });
+        return res.status(200).json({ data: data, projects: projects });            
+        
+    }
+
     static async myProjects(req, res) {
         let token = getToken(req);
         let dev = await getUserByToken(token, Dev);

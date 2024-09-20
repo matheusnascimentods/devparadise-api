@@ -28,7 +28,9 @@ router.get("/get-user", controller.getUserByToken);
 
 router.get("/my-projects", verifyToken, controller.myProjects);
 
-router.get("/search", controller.search);
+router.get("/get-by-username/:username", controller.getByUsername);
+
+router.get("/get-by-id/:id", controller.getById);
 
 router.get("/", controller.get);
 

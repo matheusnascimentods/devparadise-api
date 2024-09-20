@@ -20,6 +20,13 @@ const Project = mongoose.model(
             type: String,
             required: true,
         },
+        devUsername: {
+            type: String,
+            required: true,
+        },
+        link: {
+            type: String,
+        },
         technologies: {
             type: [String]
         },

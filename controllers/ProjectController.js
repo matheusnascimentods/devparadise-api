@@ -65,6 +65,20 @@ module.exports = class ProjectController {
             return res.status(200).json({ data: data, total: data.length });
         }
 
+        let q = req.query.q;
+
+        if (q) {
+            let data = await Project.find({
+                $or: [
+                    { title: { $regex: q, $options: 'i' } },
+                    { description: { $regex: q, $options: 'i' } },
+                    { technologies: { $in: [q] }}
+                ]
+            }).sort('-createdAt');
+
+            return res.status(200).json({ data: data, total: data.length });         
+        }
+
         let data = await Project.find().sort('-createdAt');
         return res.status(200).json({ data: data });
     }
