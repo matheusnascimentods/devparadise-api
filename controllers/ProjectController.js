@@ -12,7 +12,7 @@ const getUserByToken = require('../helpers/get-user-by-token');
 module.exports = class ProjectController {
 
     static async addProject(req, res) {
-        let {title, description, repository, technologies} = req.body;
+        let {title, description, repository, link, technologies} = req.body;
         let files = req.files;
 
         if (!title) {
@@ -39,6 +39,8 @@ module.exports = class ProjectController {
             repository: repository,
             images: images,
             technologies: technologies,
+            link: link,
+            devUsername: dev.username,
             devId: dev._id.toString(),
         });
 
@@ -51,20 +53,6 @@ module.exports = class ProjectController {
     }
 
     static async get(req, res) {
-        let id = req.query.id;
-
-        if (id) {
-            let data = await Project.findOne({ _id: id });
-            return res.status(200).json({ data: data });            
-        }
-
-        let title = req.query.title;
-
-        if (title) {
-            let data = await Project.find({ title: { $regex: title, $options: 'i' } });
-            return res.status(200).json({ data: data, total: data.length });
-        }
-
         let q = req.query.q;
 
         if (q) {
@@ -81,6 +69,18 @@ module.exports = class ProjectController {
 
         let data = await Project.find().sort('-createdAt');
         return res.status(200).json({ data: data });
+    }
+
+    static async getById(req, res) {
+        let {id} = req.params;
+
+        let data = await Project.findOne({ _id: id });
+
+        if (!data) {
+            return res.status(404).message({ message: 'Nada encontrado! '});
+        }
+
+        return res.status(200).json({ data: data }); 
     }
 
     static async getImages(req, res) {
@@ -114,7 +114,7 @@ module.exports = class ProjectController {
             return res.status(401).json({ message: 'Algo deu errado!' });
         }
 
-        let { title, description, repository, technologies } = req.body;
+        let { title, description, repository, link, technologies } = req.body;
         let files = req.files;
         
         if(!title || !description) {
@@ -136,6 +136,7 @@ module.exports = class ProjectController {
         project.title = title;
         project.description = description;
         project.repository = repository;
+        project.link = link;
         project.images = images;
         project.technologies = technologies;
 

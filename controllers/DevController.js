@@ -139,12 +139,23 @@ module.exports = class DevController {
         let token = getToken(req);
         let dev = await getUserByToken(token, Dev);
 
-        let title = req.query.title;
+        let q = req.query.q;
 
-        if (title) {
-            title = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            let data = await Project.find({ title: { $regex: title, $options: 'i' } });
-            return res.status(200).json({ data: data, total: data.length });
+        if(q) {
+            let data = await Project.find({
+                $and: [
+                    { devId: dev._id.toString() },
+                    {
+                        $or: [
+                            { title: { $regex: q, $options: 'i' } },
+                            { description: { $regex: q, $options: 'i' } },
+                            { technologies: { $in: [q] }}
+                        ]
+                    }
+                ]
+            }).sort('-createdAt');
+
+            return res.status(200).json({ data: data, total: data.length });     
         }
 
         let projects = await Project.find({ devId: dev._id.toString() });
