@@ -283,8 +283,19 @@ module.exports = class DevController {
         let token = getToken(req);
         let dev = await getUserByToken(token);
 
+        let {password} = req.body;
+
+        //check password
+        let checkPassword = await bcrypt.compare(password, dev.password);
+
+        if(!checkPassword) {
+            return res.status(422).json({ message: 'Senha invalída'});
+        }
+
+        let devId = dev._id;
+
         await Dev.findByIdAndDelete(dev._id);
-        await Project.deleteMany({ devId: dev._id });
+        await Project.deleteMany({ devId: devId });
 
         return res.status(204).json({ message: 'Exclusão realizada com sucesso' });
     }
