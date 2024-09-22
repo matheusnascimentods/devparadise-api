@@ -19,7 +19,7 @@ router.post('/', [
 ], checkBody, controller.post);
 
 router.post('/login', [
-    body('email').isEmail(),
+    body('login').notEmpty(),
     body('password').notEmpty()
 ], checkBody, controller.login);
 

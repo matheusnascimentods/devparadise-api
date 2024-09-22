@@ -67,12 +67,17 @@ module.exports = class DevController {
 
     static async login(req, res) {''
           
-        let {email, password} = req.body;
+        let {login, password} = req.body;
 
-        let dev = await Dev.findOne({ email: email });
+        let dev = await Dev.findOne({
+            $or: [
+                { email: login },
+                { username: login },
+            ]
+        });
 
         if(!dev) {
-            return res.status(422).json({ message: 'E-mail não encontrado'});
+            return res.status(422).json({ message: 'Usuário não encontrado'});
         }
 
         let checkPassword = await bcrypt.compare(password, dev.password);
