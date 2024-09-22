@@ -24,7 +24,7 @@ module.exports = class ProjectController {
         }
 
         let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
+        let dev = await getUserByToken(token);
 
         let images = [];
         if (files) {
@@ -109,7 +109,7 @@ module.exports = class ProjectController {
 
         //Get by token
         let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
+        let dev = await getUserByToken(token);
 
         if (project.devId !== dev._id.toString()) {
             return res.status(401).json({ message: 'Algo deu errado!' });
@@ -168,7 +168,7 @@ module.exports = class ProjectController {
 
         //Get by token
         let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
+        let dev = await getUserByToken(token);
 
         if (project.devId !== dev._id.toString()) {
             return res.status(401).json({ message: 'Algo deu errado!' });

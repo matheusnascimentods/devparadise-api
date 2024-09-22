@@ -142,7 +142,7 @@ module.exports = class DevController {
 
     static async myProjects(req, res) {
         let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
+        let dev = await getUserByToken(token);
 
         let q = req.query.q;
 
@@ -171,7 +171,7 @@ module.exports = class DevController {
     static async getUserByToken (req, res) {
 
         let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
+        let dev = await getUserByToken(token);
 
         let projects = await Project.find({ devId: dev._id.toString() });
 
@@ -182,7 +182,7 @@ module.exports = class DevController {
         let { name, username, email, phone, description, skils, github, linkedin } = req.body;
         
         let token = getToken(req);        
-        let dev = await getUserByToken(token, Dev);
+        let dev = await getUserByToken(token);
 
         //Validation
         if (!name) {
@@ -253,7 +253,7 @@ module.exports = class DevController {
 
         //Get dev
         let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
+        let dev = await getUserByToken(token);
 
         //Check password
         let checkPassword = await bcrypt.compare(password, dev.password);
@@ -281,7 +281,7 @@ module.exports = class DevController {
 
     static async delete(req, res) {
         let token = getToken(req);
-        let dev = await getUserByToken(token, Dev);
+        let dev = await getUserByToken(token);
 
         await Dev.findByIdAndDelete(dev._id);
         await Project.deleteMany({ devId: dev._id });

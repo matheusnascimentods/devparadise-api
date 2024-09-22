@@ -23,9 +23,6 @@ app.use('/dev', DevRoutes);
 const ProjectRoutes = require('./routes/ProjectRoutes');
 app.use('/project', ProjectRoutes);
 
-const ContractorRoutes = require('./routes/ContractorRoutes');
-app.use('/contractor', ContractorRoutes);
-
 app.listen(port, () => {
     console.log(`Running in port ${port}`);
 });
