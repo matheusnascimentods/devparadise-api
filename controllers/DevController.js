@@ -232,6 +232,8 @@ module.exports = class DevController {
                 { new: true },
             );
 
+            await Project.updateMany({ devId: dev._id }, { devUsername: updatedData.username });
+
             updatedData.password = undefined;
 
             return res.json({ message: 'Operação realizada com sucesso!', data: updatedData });
@@ -277,6 +279,7 @@ module.exports = class DevController {
         let dev = await getUserByToken(token, Dev);
 
         await Dev.findByIdAndDelete(dev._id);
+        await Project.deleteMany({ devId: dev._id });
 
         return res.status(204).json({ message: 'Exclusão realizada com sucesso' });
     }

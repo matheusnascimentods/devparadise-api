@@ -60,6 +60,7 @@ module.exports = class ProjectController {
                 $or: [
                     { title: { $regex: q, $options: 'i' } },
                     { description: { $regex: q, $options: 'i' } },
+                    { devUsername: { $regex: q, $options: 'i' } },
                     { technologies: { $in: [q] }}
                 ]
             }).sort('-createdAt');
