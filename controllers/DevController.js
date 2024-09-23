@@ -159,14 +159,25 @@ module.exports = class DevController {
                         ]
                     }
                 ]
-            }).sort({ favorite: -1 });
+            }).sort({ favorite: 1 });
 
             return res.status(200).json({ data: data, total: data.length });     
         }
 
-        let projects = await Project.find({ devId: dev._id.toString() });
+        let projects = await Project.find({ devId: dev._id.toString() }).sort({ favorite: -1 });
 
         return res.json({ devId: dev._id.toString(), projects: projects})
+    }
+
+    static async myFavorites(req, res) {
+        let token = getToken(req);
+        let dev = await getUserByToken(token);
+
+        let projects = await Project.find({ devId: dev._id, favorite: true }).sort('-createdAt');
+
+        console.log(projects.length)
+
+        return res.json({ projects: projects, total: projects.length })
     }
 
     static async getUserByToken (req, res) {

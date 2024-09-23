@@ -28,6 +28,8 @@ router.get("/get-user", controller.getUserByToken);
 
 router.get("/my-projects", verifyToken, controller.myProjects);
 
+router.get("/my-favorites", verifyToken, controller.myFavorites);
+
 router.get("/get-by-username/:username", controller.getByUsername);
 
 router.get("/get-by-id/:id", controller.getById);

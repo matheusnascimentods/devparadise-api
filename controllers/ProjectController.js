@@ -97,6 +97,20 @@ module.exports = class ProjectController {
         return res.status(200).json({ images: project.images });
     }
 
+    static async getFavorites(req, res) {
+        let { username } = req.params;
+
+        let dev = await Dev.findOne({ username: username });
+
+        if(!dev) {
+            return res.status(404).json({ message: "Usuario não encontrado!" });
+        }
+
+        let data = await Project.find({ devUsername: username, favorite: true }).sort('-createdAt');
+
+        return res.status(200).json({ projects: data, total: data.length });
+    }
+
     static async editProject(req, res) {
         
         //Get and check id
