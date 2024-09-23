@@ -32,6 +32,10 @@ const Project = mongoose.model(
         },
         images: {
             type: Array
+        },
+        favorite: {
+            type: Boolean,
+            default: false,
         }
     }, {timestamps: true})
 );

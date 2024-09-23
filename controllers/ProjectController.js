@@ -1,6 +1,7 @@
 //Imports
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
+const ObjectId = require('mongoose').Types.ObjectId
 const Project = require('../models/Project');
 const Dev = require('../models/Dev');
 
@@ -155,6 +156,59 @@ module.exports = class ProjectController {
         } catch (error) {
             res.status(500).json({ message: error });
         }
+    }
+
+    static async favorite(req, res) {
+        
+        let { id } = req.body;
+
+        if(!id) {
+            console.log('f')
+            return res.status(422).json({ message: 'ID invalído!'})
+        }
+
+        if(!ObjectId.isValid(id)) {
+            console.log('g')
+            return res.status(422).json({ message: 'Id invalído!' });
+
+        }
+
+        
+        //Get user and project
+        let token = getToken(req);
+        let dev = await getUserByToken(token);
+
+        let project = await Project.findOne({ 
+            _id: id, 
+            devId: dev._id.toString()
+        });
+
+        if (!project) {
+            return res.status(404).json({ message: 'Projeto não encontrado!' });
+        }
+
+        let message = '';
+
+        if (project.favorite === false) {
+            project.favorite = true;
+            message = 'Este projeto foi adicionado aos seus favoritos!';
+        } else  {
+            project.favorite = false;
+            message = 'Este projeto foi removido dos seus favoritos!';
+        }
+
+        try {
+            let updatedDatadata = await Project.findOneAndUpdate(
+                { _id: project._id },
+                { $set: project },
+                { new: true },
+            );
+
+            return res.status(200).json({ project: updatedDatadata, message: message });
+
+        } catch (error) {
+            return res.status(500).json({ message: error});
+        }  
     }
 
     static async deleteProject(req, res) {

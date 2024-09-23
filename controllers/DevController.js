@@ -8,6 +8,7 @@ const createUserToken = require('../helpers/create-user-token');
 const getToken = require('../helpers/get-token');
 const getUserByToken = require('../helpers/get-user-by-token');
 const Project = require('../models/Project');
+const { favorite } = require('./ProjectController');
 
 module.exports = class DevController {
 
@@ -158,7 +159,7 @@ module.exports = class DevController {
                         ]
                     }
                 ]
-            }).sort('-createdAt');
+            }).sort({ favorite: -1 });
 
             return res.status(200).json({ data: data, total: data.length });     
         }

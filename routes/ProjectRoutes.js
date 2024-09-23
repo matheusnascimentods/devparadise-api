@@ -16,6 +16,7 @@ router.get('/get-images/:id', verifyId, controller.getImages);
 router.get('/', controller.get);
 
 //PATCH
+router.patch('/favorite', verifyToken, controller.favorite)
 router.patch('/:id', verifyToken, verifyId, imageUpload.array("images"), controller.editProject)
 
 //DELETE
