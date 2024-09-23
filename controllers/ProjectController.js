@@ -70,7 +70,7 @@ module.exports = class ProjectController {
         }
 
         let data = await Project.find().sort('-createdAt');
-        return res.status(200).json({ data: data });
+        return res.status(200).json({ data: data, total: data.length });
     }
 
     static async getById(req, res) {

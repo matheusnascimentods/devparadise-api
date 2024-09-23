@@ -107,7 +107,7 @@ module.exports = class DevController {
         }
 
         let data = await Dev.find().sort('-createdAt');
-        return res.status(200).json({ data: data });
+        return res.status(200).json({ data: data, total: data.length });
     }
 
     static async getByUsername(req, res) {
@@ -184,6 +184,10 @@ module.exports = class DevController {
 
         let token = getToken(req);
         let dev = await getUserByToken(token);
+
+        if(!dev) {
+            return res.status(204);
+        }
 
         let projects = await Project.find({ devId: dev._id.toString() });
 
