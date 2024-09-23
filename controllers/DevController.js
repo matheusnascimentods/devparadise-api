@@ -124,7 +124,7 @@ module.exports = class DevController {
         }
 
         let projects = await Project.find({ devId: data._id.toString() });
-        return res.status(200).json({ data: data, projects: projects });   
+        return res.status(200).json({ data: data });   
     }
 
     static async getById(req, res) {
@@ -166,7 +166,7 @@ module.exports = class DevController {
 
         let projects = await Project.find({ devId: dev._id.toString() }).sort({ favorite: -1 });
 
-        return res.json({ devId: dev._id.toString(), projects: projects})
+        return res.json({ devId: dev._id.toString(), projects: projects, total: projects.length})
     }
 
     static async myFavorites(req, res) {

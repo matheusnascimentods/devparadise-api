@@ -13,7 +13,7 @@ router.post('/', verifyToken, imageUpload.array("images"), controller.addProject
 //GET
 router.get('/get-by-id/:id', verifyId, controller.getById);
 router.get('/get-images/:id', verifyId, controller.getImages);
-router.get('/get-favorites/:username', controller.getFavorites);
+router.get('/get-projects/:username', controller.getProjects);
 router.get('/', controller.get);
 
 //PATCH
