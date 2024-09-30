@@ -17,8 +17,8 @@ app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
 app.use(express.static('public'));
 
 //Routes
-const DevRoutes = require('./routes/DevRoutes');
-app.use('/dev', DevRoutes);
+const UserRoutes = require('./routes/UserRoutes');
+app.use('/dev', UserRoutes);
 
 const ProjectRoutes = require('./routes/ProjectRoutes');
 app.use('/project', ProjectRoutes);
