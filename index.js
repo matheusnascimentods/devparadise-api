@@ -23,6 +23,9 @@ app.use('/dev', DevRoutes);
 const ProjectRoutes = require('./routes/ProjectRoutes');
 app.use('/project', ProjectRoutes);
 
+const ConnectionRoutes = require('./routes/ConnectionRoutes');
+app.use('/connection', ConnectionRoutes);
+
 app.listen(port, () => {
     console.log(`Running in port ${port}`);
 });

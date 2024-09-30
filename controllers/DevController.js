@@ -8,7 +8,6 @@ const createUserToken = require('../helpers/create-user-token');
 const getToken = require('../helpers/get-token');
 const getUserByToken = require('../helpers/get-user-by-token');
 const Project = require('../models/Project');
-const { favorite } = require('./ProjectController');
 
 module.exports = class DevController {
 
@@ -124,7 +123,8 @@ module.exports = class DevController {
         }
 
         let projects = await Project.find({ devId: data._id.toString() });
-        return res.status(200).json({ data: data });   
+
+        return res.status(200).json({ data: data, projects: projects });   
     }
 
     static async getById(req, res) {
@@ -137,7 +137,8 @@ module.exports = class DevController {
         }
 
         let projects = await Project.find({ devId: data._id.toString() });
-        return res.status(200).json({ data: data, projects: projects });            
+
+        return res.status(200).json({ data: data, projects: projects, });              
         
     }
 
