@@ -1,52 +1,42 @@
 //Imports
 const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken');
-const Dev = require('../models/Dev');
+const User = require('../models/User');
+const Project = require('../models/Project');
 
 //Helpers
 const createUserToken = require('../helpers/create-user-token');
 const getToken = require('../helpers/get-token');
 const getUserByToken = require('../helpers/get-user-by-token');
-const Project = require('../models/Project');
 
-module.exports = class DevController {
+module.exports = class UserController {
 
-    static async post(req, res) {
+    static async signup(req, res) {
         let {name, username, email, cpf, phone, description, skils, password} = req.body;
 
         //Check if user exists
-        let cpfExists = await Dev.findOne({ cpf: cpf});
+        let cpfExists = await User.findOne({ cpf: cpf});
 
         if(cpfExists) {
-            res.status(422).json({
-                message: 'CPF em uso'
-            });
-            return;
+            return res.status(422).json({ message: 'CPF em uso' });
         }
 
-        let emailExists = await Dev.findOne({ email: email});
+        let emailExists = await User.findOne({ email: email});
 
         if(emailExists) {
-            res.status(422).json({
-                message: 'Email em uso'
-            });
-            return;
+            return res.status(422).json({ message: 'Email em uso' });
         }
 
-        let usernameExists = await Dev.findOne({ username: username});
+        let usernameExists = await User.findOne({ username: username});
 
         if(usernameExists) {
-            res.status(422).json({
-                message: 'Username em uso'
-            });
-            return;
+            return res.status(422).json({ message: 'Username em uso' });
         }
 
         //Create user
         let salt  = await bcrypt.genSalt(12);
         let passwordHash = await bcrypt.hash(password, salt);
 
-        let dev = new Dev({
+        let user = new User({
             name: name,
             username: username,
             email: email, 
@@ -58,7 +48,7 @@ module.exports = class DevController {
         });
 
         try {
-            let newUser = await dev.save();
+            let newUser = await user.save();
             await createUserToken(newUser, req, res); 
         } catch (error) {
             res.status(500).json({ message: error });
@@ -69,31 +59,31 @@ module.exports = class DevController {
           
         let {login, password} = req.body;
 
-        let dev = await Dev.findOne({
+        let user = await User.findOne({
             $or: [
                 { email: login },
                 { username: login },
             ]
         });
 
-        if(!dev) {
+        if(!user) {
             return res.status(422).json({ message: 'Usuário não encontrado'});
         }
 
-        let checkPassword = await bcrypt.compare(password, dev.password);
+        let checkPassword = await bcrypt.compare(password, user.password);
 
         if(!checkPassword) {
             return res.status(422).json({ message: 'Senha invalída'});
         }
         
-        await createUserToken(dev, req, res); 
+        await createUserToken(user, req, res); 
     }
 
     static async get(req, res) {
-        const q = req.query.q;
+        const { q, username, id } = req.query;
 
         if (q) {
-            let data = await Dev.find({
+            let users = await User.find({
                 $or: [
                     { name: { $regex: q, $options: 'i' } },
                     { username: { $regex: q, $options: 'i' } },
@@ -102,44 +92,35 @@ module.exports = class DevController {
                 ]
             }).sort('-createdAt');
 
-            return res.status(200).json({ data: data, total: data.length });            
+            return res.status(200).json({ data: users, total: users.length });            
         }
 
-        let data = await Dev.find().sort('-createdAt');
-        return res.status(200).json({ data: data, total: data.length });
-    }
+        if (username) {
+            let user = await User.findOne({ username: username });
 
-    static async getByUsername(req, res) {
-        let username = req.params.username;
+            if(!user) {
+                return res.status(404).json({ message: "Usuario não encontrado" }); 
+            }
 
-        if (!username) {
-            return res.status(422).json({ message: 'Informe um username!' });
+            let projects = await Project.find({ devId: user._id.toString() });
+
+            return res.status(200).json({ data: user, projects: projects }); 
         }
 
-        let data = await Dev.findOne({ username: username });
+        if (id) {
+            let user = await User.findOne({ _id: id });
 
-        if (!data) {
-            return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
+            if (!user) {
+                return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
+            }
+
+            let projects = await Project.find({ devId: user._id.toString() });
+
+            return res.status(200).json({ data: user, projects: projects, });  
         }
 
-        let projects = await Project.find({ devId: data._id.toString() });
-
-        return res.status(200).json({ data: data, projects: projects });   
-    }
-
-    static async getById(req, res) {
-        let id = req.params.id;
-
-        let data = await Dev.findOne({ _id: id });
-        
-        if (!data) {
-            return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
-        }
-
-        let projects = await Project.find({ devId: data._id.toString() });
-
-        return res.status(200).json({ data: data, projects: projects, });              
-        
+        let users = await User.find().sort('-createdAt');
+        return res.status(200).json({ data: users, total: users.length });
     }
 
     static async myProjects(req, res) {
@@ -170,36 +151,25 @@ module.exports = class DevController {
         return res.json({ devId: dev._id.toString(), projects: projects, total: projects.length})
     }
 
-    static async myFavorites(req, res) {
-        let token = getToken(req);
-        let dev = await getUserByToken(token);
-
-        let projects = await Project.find({ devId: dev._id, favorite: true }).sort('-createdAt');
-
-        console.log(projects.length)
-
-        return res.json({ projects: projects, total: projects.length })
-    }
-
     static async getUserByToken (req, res) {
 
         let token = getToken(req);
-        let dev = await getUserByToken(token);
+        let user = await getUserByToken(token);
 
-        if(!dev) {
+        if(!user) {
             return res.status(204);
         }
 
-        let projects = await Project.find({ devId: dev._id.toString() });
+        let projects = await Project.find({ devId: user._id.toString() });
 
-        return res.json({ dev: dev, projects: projects})
+        return res.json({ dev: user, projects: projects})
     }
 
     static async edit(req, res) {
         let { name, username, email, phone, description, skils, github, linkedin } = req.body;
         
         let token = getToken(req);        
-        let dev = await getUserByToken(token);
+        let user = await getUserByToken(token);
 
         //Validation
         if (!name) {
@@ -216,18 +186,18 @@ module.exports = class DevController {
         }
         
         //Username validation
-        let checkUsername = await Dev.findOne({ username: username });
+        let checkUsername = await User.findOne({ username: username });
 
-        if (dev.username !== username && checkUsername) {
+        if (user.username !== username && checkUsername) {
             return res.status(422).json({ message: 'username em uso'});
         }
 
-        dev.username = username;
+        user.username = username;
 
         //Email validation
-        let checkEmail = await Dev.findOne({ email: email });
+        let checkEmail = await User.findOne({ email: email });
 
-        if (dev.email !== email && checkEmail) {
+        if (user.email !== email && checkEmail) {
             return res.status(422).json({ message: 'E-mail em uso'});
         }
 
@@ -235,26 +205,26 @@ module.exports = class DevController {
         if (req.file) {
             image = req.file.filename
         } else {
-            image = dev.image;
+            image = user.image;
         }
 
-        dev.name = name;
-        dev.email = email;
-        dev.description = description;
-        dev.skils = skils;
-        dev.phone = phone;
-        dev.github = github;
-        dev.linkedin = linkedin;
-        dev.image = image;
+        user.name = name;
+        user.email = email;
+        user.description = description;
+        user.skils = skils;
+        user.phone = phone;
+        user.github = github;
+        user.linkedin = linkedin;
+        user.image = image;
 
         try {
-            let updatedData = await Dev.findOneAndUpdate(
-                { _id: dev._id },
-                { $set: dev },
+            let updatedData = await User.findOneAndUpdate(
+                { _id: user._id },
+                { $set: user },
                 { new: true },
             );
 
-            await Project.updateMany({ devId: dev._id }, { devUsername: updatedData.username });
+            await Project.updateMany({ devId: user._id }, { devUsername: updatedData.username });
 
             updatedData.password = undefined;
 
@@ -270,10 +240,10 @@ module.exports = class DevController {
 
         //Get dev
         let token = getToken(req);
-        let dev = await getUserByToken(token);
+        let user = await getUserByToken(token);
 
         //Check password
-        let checkPassword = await bcrypt.compare(password, dev.password);
+        let checkPassword = await bcrypt.compare(password, user.password);
 
         if(!checkPassword) {
             return res.status(422).json({ message: 'Senha invalída'});
@@ -289,30 +259,30 @@ module.exports = class DevController {
         let passwordHash = await bcrypt.hash(newPassword, salt);
 
         //Change password
-        dev.password = passwordHash;
+        user.password = passwordHash;
 
-        await Dev.findByIdAndUpdate(dev._id, dev);
+        await User.findByIdAndUpdate(user._id, user);
 
         return res.status(204).json({ data: 'Operação realizada com sucesso!'});
     }
 
     static async delete(req, res) {
         let token = getToken(req);
-        let dev = await getUserByToken(token);
+        let user = await getUserByToken(token);
 
         let {password} = req.body;
 
         //check password
-        let checkPassword = await bcrypt.compare(password, dev.password);
+        let checkPassword = await bcrypt.compare(password, user.password);
 
         if(!checkPassword) {
             return res.status(422).json({ message: 'Senha invalída'});
         }
 
-        let devId = dev._id;
+        let id = user._id;
 
-        await Dev.findByIdAndDelete(dev._id);
-        await Project.deleteMany({ devId: devId });
+        await User.findByIdAndDelete(id);
+        await Project.deleteMany({ devId: id });
 
         return res.status(204).json({ message: 'Exclusão realizada com sucesso' });
     }

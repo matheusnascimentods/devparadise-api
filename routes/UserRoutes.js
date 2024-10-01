@@ -1,9 +1,8 @@
 const router = require('express').Router();
 const { body } = require('express-validator');
 
-const controller = require('../controllers/DevController');
+const controller = require('../controllers/UserController');
 const verifyToken = require('../helpers/check-token');
-const verifyId = require('../helpers/check-id');
 const checkBody = require('../helpers/check-body');
 const { imageUpload } = require('../helpers/image-upload');
 
@@ -16,7 +15,7 @@ router.post('/', [
     body('email').isEmail().normalizeEmail(),
     body('cpf').isLength({ min: 11}),
     body('password').isLength({ min: 6 }),
-], checkBody, controller.post);
+], checkBody, controller.signup);
 
 router.post('/login', [
     body('login').notEmpty(),
@@ -27,12 +26,6 @@ router.post('/login', [
 router.get("/get-user", controller.getUserByToken);
 
 router.get("/my-projects", verifyToken, controller.myProjects);
-
-router.get("/my-favorites", verifyToken, controller.myFavorites);
-
-router.get("/get-by-username/:username", controller.getByUsername);
-
-router.get("/get-by-id/:id", controller.getById);
 
 router.get("/", controller.get);
 
