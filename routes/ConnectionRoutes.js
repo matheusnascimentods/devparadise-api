@@ -6,11 +6,11 @@ const verifyToken = require('../helpers/check-token');
 const checkBody = require('../helpers/check-body');
 
 //GET
-router.get("/status", verifyToken, controller.followStatus);
+router.get("/status", verifyToken, controller.status);
 
-router.get("/:username/followers", verifyToken, controller.followers);
+router.get("/:username/followers", controller.followers);
 
-router.get("/:username/following", verifyToken, controller.following);
+router.get("/:username/following", controller.following);
 
 //POST
 router.post('/follow', [

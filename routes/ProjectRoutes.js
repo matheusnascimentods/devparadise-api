@@ -8,17 +8,15 @@ const checkBody = require('../helpers/check-body');
 const { imageUpload } = require('../helpers/image-upload');
 
 //POST
-router.post('/', verifyToken, imageUpload.array("images"), controller.addProject)
+router.post('/', verifyToken, imageUpload.array("images"), controller.publish)
 
 //GET
-router.get('/get-by-id/:id', verifyId, controller.getById);
 router.get('/get-images/:id', verifyId, controller.getImages);
-router.get('/get-projects/:username', controller.getProjects);
 router.get('/', controller.get);
 
 //PATCH
 router.patch('/favorite', verifyToken, controller.favorite)
-router.patch('/:id', verifyToken, verifyId, imageUpload.array("images"), controller.editProject)
+router.patch('/:id', verifyToken, verifyId, imageUpload.array("images"), controller.update)
 
 //DELETE
 router.delete('/:id', verifyToken, verifyId, controller.deleteProject);

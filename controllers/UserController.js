@@ -151,7 +151,7 @@ module.exports = class UserController {
         return res.json({ devId: dev._id.toString(), projects: projects, total: projects.length})
     }
 
-    static async getUserByToken (req, res) {
+    static async getCurrentUser (req, res) {
 
         let token = getToken(req);
         let user = await getUserByToken(token);

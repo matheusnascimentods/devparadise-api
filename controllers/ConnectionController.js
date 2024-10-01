@@ -1,17 +1,17 @@
 const getToken = require("../helpers/get-token");
 const getUserByToken = require("../helpers/get-user-by-token");
 const Connection = require("../models/Connection");
-const Dev = require("../models/Dev");
+const User = require("../models/User");
 
 module.exports = class ConnectionController {
     static async follow(req, res) {
 
         let token = getToken(req);
-        let dev = await getUserByToken(token);
+        let user = await getUserByToken(token);
         
         let { followedId } = req.body; 
 
-        let followed = await Dev.findOne({ _id: followedId });
+        let followed = await User.findOne({ _id: followedId });
 
         if (!followed) {
             return res.status(422).json({ message: 'Usuário não encontrado! '});
@@ -19,7 +19,7 @@ module.exports = class ConnectionController {
 
         let alreadyFollows = await Connection.findOne({ 
             followedId: followed._id.toString(),
-            followerId: dev._id.toString()
+            followerId: user._id.toString()
         });
 
         if(alreadyFollows) {
@@ -27,7 +27,7 @@ module.exports = class ConnectionController {
         }        
         try {
             let follow = new Connection({
-                followerId: dev._id.toString(),
+                followerId: user._id.toString(),
                 followedId: followed._id.toString()
             });
 
@@ -39,13 +39,13 @@ module.exports = class ConnectionController {
         }
     }
 
-    static async followStatus(req, res) {
+    static async status(req, res) {
         let token = getToken(req);
-        let dev = await getUserByToken(token);
+        let user = await getUserByToken(token);
 
         let { followedId } = req.body; 
 
-        let followed = await Dev.findOne({ _id: followedId });
+        let followed = await User.findOne({ _id: followedId });
 
         if (!followed) {
             return res.status(422).json({ message: 'Usuário não encontrado! '});
@@ -54,12 +54,12 @@ module.exports = class ConnectionController {
         try {
             let alreadyFollowYou = await Connection.findOne({
                 followerId: followed._id.toString(),
-                followedId: dev._id.toString(),
+                followedId: user._id.toString(),
             });
 
             let alreadyYouFollow = await Connection.findOne({
                 followedId: followed._id,
-                followerId: dev._id,
+                followerId: user._id,
             });
             
             return res.status(200).json({ 
@@ -79,7 +79,7 @@ module.exports = class ConnectionController {
             return res.status(422).json({ message: 'Informe um username!' });
         }
 
-        let user = await Dev.findOne({ username: username });
+        let user = await User.findOne({ username: username });
 
         if (!user) {
             return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
@@ -90,7 +90,7 @@ module.exports = class ConnectionController {
     
             let followersIds = followers.map(follow => follow.followerId);
     
-            followers = await Dev.find({ _id: { $in: followersIds }});
+            followers = await User.find({ _id: { $in: followersIds }});
     
             return res.status(200).json({ message: `Seguidores de ${user.username}`, followers:  followers, total: followers.length });
         } 
@@ -106,7 +106,7 @@ module.exports = class ConnectionController {
             return res.status(422).json({ message: 'Informe um username!' });
         }
 
-        let user = await Dev.findOne({ username: username });
+        let user = await User.findOne({ username: username });
 
         if (!user) {
             return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
@@ -117,7 +117,7 @@ module.exports = class ConnectionController {
 
             let followingIds = following.map(following => following.followedId);
 
-            following = await Dev.find({ _id: { $in: followingIds }});
+            following = await User.find({ _id: { $in: followingIds }});
     
             return res.status(200).json({ message: `Usuarios seguidos por ${user.username}`, following: following, total: following.length });
         } 
@@ -128,11 +128,11 @@ module.exports = class ConnectionController {
 
     static async unfollow(req, res) {
         let token = getToken(req);
-        let dev = await getUserByToken(token);
+        let user = await getUserByToken(token);
 
         let { followedId } = req.body; 
 
-        let followed = await Dev.findOne({ _id: followedId });
+        let followed = await User.findOne({ _id: followedId });
 
         if (!followed) {
             return res.status(422).json({ message: 'Usuário não encontrado! '});
@@ -140,7 +140,7 @@ module.exports = class ConnectionController {
 
         let alreadyFollows = await Connection.findOne({ 
             followedId: followed._id.toString(),
-            followerId: dev._id.toString()
+            followerId: user._id.toString()
         });
 
         if (!alreadyFollows) {

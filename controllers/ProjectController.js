@@ -1,18 +1,15 @@
 //Imports
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken');
 const ObjectId = require('mongoose').Types.ObjectId
 const Project = require('../models/Project');
-const Dev = require('../models/Dev');
+const User = require('../models/User');
 
 //Helpers
-const createUserToken = require('../helpers/create-user-token');
 const getToken = require('../helpers/get-token');
 const getUserByToken = require('../helpers/get-user-by-token');
 
 module.exports = class ProjectController {
 
-    static async addProject(req, res) {
+    static async publish(req, res) {
         let {title, description, repository, link, technologies} = req.body;
         let files = req.files;
 
@@ -25,7 +22,7 @@ module.exports = class ProjectController {
         }
 
         let token = getToken(req);
-        let dev = await getUserByToken(token);
+        let user = await getUserByToken(token);
 
         let images = [];
         if (files) {
@@ -41,20 +38,21 @@ module.exports = class ProjectController {
             images: images,
             technologies: technologies,
             link: link,
-            devUsername: dev.username,
-            devId: dev._id.toString(),
+            devUsername: user.username,
+            devId: user._id.toString(),
         });
 
         try {
             let data = await project.save();
             return res.status(201).json({ data: data });
-        } catch (error) {
+        } 
+        catch (error) {
             res.status(500).json({ message: error });
         }
     }
 
     static async get(req, res) {
-        let q = req.query.q;
+        let { q, id, author } = req.query;
 
         if (q) {
             let data = await Project.find({
@@ -69,20 +67,30 @@ module.exports = class ProjectController {
             return res.status(200).json({ data: data, total: data.length });         
         }
 
-        let data = await Project.find().sort('-createdAt');
-        return res.status(200).json({ data: data, total: data.length });
-    }
+        if (id) {
+            let data = await Project.findOne({ _id: id });
 
-    static async getById(req, res) {
-        let {id} = req.params;
+            if (!data) {
+                return res.status(404).message({ message: 'Este projeto não existe' });
+            }
 
-        let data = await Project.findOne({ _id: id });
-
-        if (!data) {
-            return res.status(404).message({ message: 'Nada encontrado! '});
+            return res.status(200).json({ data: data }); 
         }
 
-        return res.status(200).json({ data: data }); 
+        if (author) {
+            let user = await User.findOne({ username: author });
+
+            if (!user) {
+                return res.status(404).json({ message: "Usuario não encontrado!" }); 
+            }
+
+            let projects = await Project.find({ devId: user._id.toString() }).sort({ favorite: -1 });
+            
+            return res.status(200).json({ message: `Projetos de ${user.username}`, projects: projects, total: projects.length });
+        }
+
+        let data = await Project.find().sort('-createdAt');
+        return res.status(200).json({ data: data, total: data.length });
     }
 
     static async getImages(req, res) {
@@ -97,44 +105,30 @@ module.exports = class ProjectController {
         return res.status(200).json({ images: project.images });
     }
 
-    static async getProjects(req, res) {
-        let { username } = req.params;
-
-        let dev = await Dev.findOne({ username: username });
-
-        if(!dev) {
-            return res.status(404).json({ message: "Usuario não encontrado!" });
-        }
-
-        let data = await Project.find({ devUsername: username }).sort({ favorite: -1 });
-
-        return res.status(200).json({ projects: data, total: data.length });
-    }
-
-    static async editProject(req, res) {
+    static async update(req, res) {
         
         //Get and check id
         let { id } = req.params;
 
-        let project = await Project.findById(id);
+        //Get by token
+        let token = getToken(req);
+        let user = await getUserByToken(token);
+
+        let project = await Project.findOne({ _id: id, devId: user._id.toString() });
 
         if(!project) {
             return res.status(404).json({ message: 'Projeto não encontrado!' });
         }
 
-        //Get by token
-        let token = getToken(req);
-        let dev = await getUserByToken(token);
-
-        if (project.devId !== dev._id.toString()) {
-            return res.status(401).json({ message: 'Algo deu errado!' });
-        }
-
         let { title, description, repository, link, technologies } = req.body;
         let files = req.files;
         
-        if(!title || !description) {
-            return res.status(422).json({ message: 'Preencha todos os campos!' });
+        if(!title) {
+            return res.status(422).json({ message: 'Informe o nome do projeto!' });
+        }
+
+        if (!description) {
+            return res.status(422).json({ message: 'Informe a descrição do projeto!' });
         }
 
         let images = [];
@@ -177,24 +171,20 @@ module.exports = class ProjectController {
         let { id } = req.body;
 
         if(!id) {
-            console.log('f')
             return res.status(422).json({ message: 'ID invalído!'})
         }
 
         if(!ObjectId.isValid(id)) {
-            console.log('g')
             return res.status(422).json({ message: 'Id invalído!' });
-
         }
-
         
         //Get user and project
         let token = getToken(req);
-        let dev = await getUserByToken(token);
+        let user = await getUserByToken(token);
 
         let project = await Project.findOne({ 
             _id: id, 
-            devId: dev._id.toString()
+            devId: user._id.toString()
         });
 
         if (!project) {
@@ -228,22 +218,22 @@ module.exports = class ProjectController {
     static async deleteProject(req, res) {
         let { id } = req.params;
 
-        let project = await Project.findById(id);
+        //Get by token
+        let token = getToken(req);
+        let user = await getUserByToken(token);
+
+        let project = await Project.findOne({ _id: id, devId: user._id.toString() });
 
         if(!project) {
             return res.status(404).json({ message: 'Projeto não encontrado!' });
         }
 
-        //Get by token
-        let token = getToken(req);
-        let dev = await getUserByToken(token);
-
-        if (project.devId !== dev._id.toString()) {
-            return res.status(401).json({ message: 'Algo deu errado!' });
+        try {
+            await Project.findOneAndDelete({ _id: project._id.toString() })
+            return res.status(200).json({ message: 'Exclusão realizada com sucesso' });
+        } 
+        catch (error) {
+            return res.status(500).json({ message: error });
         }
-
-        await Project.findByIdAndDelete(project._id);
-
-        return res.status(200).json({ message: 'Exclusão realizada com sucesso' });
     }
 }

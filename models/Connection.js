@@ -8,12 +8,10 @@ const Connection = mongoose.model (
         followerId: {
             type: String,
             required: true,
-            ref: 'Dev',
         },
         followedId: {
             type: String,
             required: true,
-            ref: 'Dev',
         },
     }, {timestamps: true})
 );

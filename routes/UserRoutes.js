@@ -23,7 +23,7 @@ router.post('/login', [
 ], checkBody, controller.login);
 
 //GET
-router.get("/get-user", controller.getUserByToken);
+router.get("/get-user", controller.getCurrentUser);
 
 router.get("/my-projects", verifyToken, controller.myProjects);
 
