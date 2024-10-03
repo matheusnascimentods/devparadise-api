@@ -7,7 +7,7 @@ const checkBody = require('../helpers/check-body');
 const { imageUpload } = require('../helpers/image-upload');
 
 //POST
-router.post('/', [
+router.post('/signup', [
     body('name').notEmpty(),
     body('description').notEmpty(),
     body('username').isLength({ min: 5 }).trim().escape(),
@@ -23,9 +23,7 @@ router.post('/login', [
 ], checkBody, controller.login);
 
 //GET
-router.get("/get-user", controller.getCurrentUser);
-
-router.get("/my-projects", verifyToken, controller.myProjects);
+router.get("/me", controller.getCurrentUser);
 
 router.get("/", controller.get);
 

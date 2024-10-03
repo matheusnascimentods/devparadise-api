@@ -74,7 +74,9 @@ module.exports = class ProjectController {
                 return res.status(404).message({ message: 'Este projeto não existe' });
             }
 
-            return res.status(200).json({ data: data }); 
+            let user = await User.findOne({ _id: data.devId });
+
+            return res.status(200).json({ data: data, user: user }); 
         }
 
         if (author) {
@@ -85,24 +87,40 @@ module.exports = class ProjectController {
             }
 
             let projects = await Project.find({ devId: user._id.toString() }).sort({ favorite: -1 });
-            
-            return res.status(200).json({ message: `Projetos de ${user.username}`, projects: projects, total: projects.length });
+
+            return res.status(200).json({ message: `Projetos de ${user.username}`, projects: projects, user: user, total: projects.length });
         }
 
         let data = await Project.find().sort('-createdAt');
         return res.status(200).json({ data: data, total: data.length });
     }
 
-    static async getImages(req, res) {
-        let {id} = req.params;
+    static async myProjects(req, res) {
+        let token = getToken(req);
+        let user = await getUserByToken(token);
 
-        let project = await Project.findById(id);
+        let q = req.query.q;
 
-        if(!project) {
-            return res.status(404).json({ message: 'Projeto não encontrado!' });
+        if(q) {
+            let data = await Project.find({
+                $and: [
+                    { devId: user._id.toString() },
+                    {
+                        $or: [
+                            { title: { $regex: q, $options: 'i' } },
+                            { description: { $regex: q, $options: 'i' } },
+                            { technologies: { $in: [q] }}
+                        ]
+                    }
+                ]
+            }).sort({ favorite: 1 });
+
+            return res.status(200).json({ data: data, total: data.length });     
         }
 
-        return res.status(200).json({ images: project.images });
+        let projects = await Project.find({ devId: user._id.toString() }).sort({ favorite: -1 });
+
+        return res.json({ devId: user._id.toString(), projects: projects, total: projects.length})
     }
 
     static async update(req, res) {
@@ -215,7 +233,7 @@ module.exports = class ProjectController {
         }  
     }
 
-    static async deleteProject(req, res) {
+    static async delete(req, res) {
         let { id } = req.params;
 
         //Get by token

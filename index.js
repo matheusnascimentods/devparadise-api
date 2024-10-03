@@ -18,7 +18,7 @@ app.use(express.static('public'));
 
 //Routes
 const UserRoutes = require('./routes/UserRoutes');
-app.use('/dev', UserRoutes);
+app.use('/user', UserRoutes);
 
 const ProjectRoutes = require('./routes/ProjectRoutes');
 app.use('/project', ProjectRoutes);

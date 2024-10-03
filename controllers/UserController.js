@@ -123,34 +123,6 @@ module.exports = class UserController {
         return res.status(200).json({ data: users, total: users.length });
     }
 
-    static async myProjects(req, res) {
-        let token = getToken(req);
-        let dev = await getUserByToken(token);
-
-        let q = req.query.q;
-
-        if(q) {
-            let data = await Project.find({
-                $and: [
-                    { devId: dev._id.toString() },
-                    {
-                        $or: [
-                            { title: { $regex: q, $options: 'i' } },
-                            { description: { $regex: q, $options: 'i' } },
-                            { technologies: { $in: [q] }}
-                        ]
-                    }
-                ]
-            }).sort({ favorite: 1 });
-
-            return res.status(200).json({ data: data, total: data.length });     
-        }
-
-        let projects = await Project.find({ devId: dev._id.toString() }).sort({ favorite: -1 });
-
-        return res.json({ devId: dev._id.toString(), projects: projects, total: projects.length})
-    }
-
     static async getCurrentUser (req, res) {
 
         let token = getToken(req);
