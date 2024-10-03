@@ -43,9 +43,13 @@ module.exports = class ConnectionController {
         let token = getToken(req);
         let user = await getUserByToken(token);
 
-        let { followedId } = req.body; 
+        let username = req.params.username;
 
-        let followed = await User.findOne({ _id: followedId });
+        if (!username) {
+            return res.status(422).json({ message: 'Informe um username!' });
+        }
+
+        let followed = await User.findOne({ username: username });
 
         if (!followed) {
             return res.status(422).json({ message: 'Usuário não encontrado! '});

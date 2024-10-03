@@ -88,6 +88,7 @@ module.exports = class ProjectController {
 
             let projects = await Project.find({ devId: user._id.toString() }).sort({ favorite: -1 });
 
+
             return res.status(200).json({ message: `Projetos de ${user.username}`, projects: projects, user: user, total: projects.length });
         }
 

@@ -6,7 +6,7 @@ const verifyToken = require('../helpers/check-token');
 const checkBody = require('../helpers/check-body');
 
 //GET
-router.get("/status", verifyToken, controller.status);
+router.get("/:username/status", verifyToken, controller.status);
 
 router.get("/:username/followers", controller.followers);
 
@@ -18,8 +18,6 @@ router.post('/follow', [
 ], checkBody, verifyToken, controller.follow);
 
 //DELETE
-router.delete('/unfollow', [
-    body('followedId').notEmpty(),
-], checkBody, verifyToken, controller.unfollow);
+router.delete('/unfollow', verifyToken, controller.unfollow);
 
 module.exports = router;
