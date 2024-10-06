@@ -22,7 +22,7 @@ module.exports = class ProjectController {
         }
 
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         let images = [];
         if (files) {
@@ -98,7 +98,7 @@ module.exports = class ProjectController {
 
     static async myProjects(req, res) {
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         let q = req.query.q;
 
@@ -131,7 +131,7 @@ module.exports = class ProjectController {
 
         //Get by token
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         let project = await Project.findOne({ _id: id, devId: user._id.toString() });
 
@@ -199,7 +199,7 @@ module.exports = class ProjectController {
         
         //Get user and project
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         let project = await Project.findOne({ 
             _id: id, 
@@ -239,7 +239,7 @@ module.exports = class ProjectController {
 
         //Get by token
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         let project = await Project.findOne({ _id: id, devId: user._id.toString() });
 

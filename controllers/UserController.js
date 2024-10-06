@@ -7,6 +7,8 @@ const Project = require('../models/Project');
 const createUserToken = require('../helpers/create-user-token');
 const getToken = require('../helpers/get-token');
 const getUserByToken = require('../helpers/get-user-by-token');
+const Connection = require("../models/Connection");
+const getTotalConnections = require('../helpers/get-total-connections');
 
 module.exports = class UserController {
 
@@ -104,7 +106,9 @@ module.exports = class UserController {
 
             let projects = await Project.find({ devId: user._id.toString() });
 
-            return res.status(200).json({ data: user, projects: projects }); 
+            let totalConnections = await getTotalConnections(user);
+
+            return res.status(200).json({ data: user, projects: projects, following: totalConnections.following, followers: totalConnections.followers }); 
         }
 
         if (id) {
@@ -116,7 +120,9 @@ module.exports = class UserController {
 
             let projects = await Project.find({ devId: user._id.toString() });
 
-            return res.status(200).json({ data: user, projects: projects, });  
+            let totalConnections = await getTotalConnections(user);
+
+            return res.status(200).json({ data: user, projects: { projects: projects, total: projects.length }, following: totalConnections.following, followers: totalConnections.followers });  
         }
 
         let users = await User.find().sort('-createdAt');
@@ -126,7 +132,7 @@ module.exports = class UserController {
     static async getCurrentUser (req, res) {
 
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         if(!user) {
             return res.status(204);
@@ -134,14 +140,16 @@ module.exports = class UserController {
 
         let projects = await Project.find({ devId: user._id.toString() });
 
-        return res.json({ dev: user, projects: projects})
+        let totalConnections = await getTotalConnections(user);
+
+        return res.json({ dev: user, projects: projects, following: totalConnections.following, followers: totalConnections.followers })
     }
 
     static async edit(req, res) {
         let { name, username, email, phone, description, skils, github, linkedin } = req.body;
         
         let token = getToken(req);        
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         //Validation
         if (!name) {
@@ -212,7 +220,7 @@ module.exports = class UserController {
 
         //Get dev
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         //Check password
         let checkPassword = await bcrypt.compare(password, user.password);
@@ -240,7 +248,7 @@ module.exports = class UserController {
 
     static async delete(req, res) {
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         let {password} = req.body;
 

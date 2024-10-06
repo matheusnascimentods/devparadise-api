@@ -7,7 +7,7 @@ module.exports = class ConnectionController {
     static async follow(req, res) {
 
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
         
         let { followedId } = req.body; 
 
@@ -41,7 +41,7 @@ module.exports = class ConnectionController {
 
     static async status(req, res) {
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         let username = req.params.username;
 
@@ -77,7 +77,8 @@ module.exports = class ConnectionController {
     }
 
     static async followers(req, res) {
-        let username = req.params.username;
+        let { username } = req.params;
+        let { q } = req.query;
 
         if (!username) {
             return res.status(422).json({ message: 'Informe um username!' });
@@ -93,6 +94,19 @@ module.exports = class ConnectionController {
             let followers = await Connection.find({ followedId: user._id.toString() }).select('followerId');
     
             let followersIds = followers.map(follow => follow.followerId);
+
+            if (q) {
+                followers = await User.find({ 
+                    _id: { $in: followersIds },
+                    $or: [
+                        { name: { $regex: q, $options: 'i' } },
+                        { username: { $regex: q, $options: 'i' } },
+                        { description: { $regex: q, $options: 'i' } },
+                        { skils: { $elemMatch: { $regex: q, $options: 'i' } } }
+                    ],
+                });
+                return res.status(200).json({ message: `Seguidores de ${user.username}`, followers:  followers, total: followers.length });
+            }
     
             followers = await User.find({ _id: { $in: followersIds }});
     
@@ -104,7 +118,8 @@ module.exports = class ConnectionController {
     }
 
     static async following(req, res) {
-        let username = req.params.username;
+        let { username } = req.params;
+        let { q } = req.query;
 
         if (!username) {
             return res.status(422).json({ message: 'Informe um username!' });
@@ -121,6 +136,19 @@ module.exports = class ConnectionController {
 
             let followingIds = following.map(following => following.followedId);
 
+            if (q) {
+                following = await User.find({ 
+                    _id: { $in: followingIds },
+                    $or: [
+                        { name: { $regex: q, $options: 'i' } },
+                        { username: { $regex: q, $options: 'i' } },
+                        { description: { $regex: q, $options: 'i' } },
+                        { skils: { $elemMatch: { $regex: q, $options: 'i' } } }
+                    ],
+                });
+                return res.status(200).json({ message: `Usuarios seguidos por ${user.username}`, following: following, total: following.length });
+            }
+
             following = await User.find({ _id: { $in: followingIds }});
     
             return res.status(200).json({ message: `Usuarios seguidos por ${user.username}`, following: following, total: following.length });
@@ -132,7 +160,7 @@ module.exports = class ConnectionController {
 
     static async unfollow(req, res) {
         let token = getToken(req);
-        let user = await getUserByToken(token);
+        let user = await getUserByToken(token, res);
 
         let { followedId } = req.body; 
 
