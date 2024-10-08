@@ -1,6 +1,7 @@
 const getToken = require("../helpers/get-token");
 const getUserByToken = require("../helpers/get-user-by-token");
 const Connection = require("../models/Connection");
+const Project = require("../models/Project");
 const User = require("../models/User");
 
 module.exports = class ConnectionController {
@@ -154,6 +155,26 @@ module.exports = class ConnectionController {
             return res.status(200).json({ message: `Usuarios seguidos por ${user.username}`, following: following, total: following.length });
         } 
         catch (error) {
+            return res.status(422).json({ message: 'Algo deu errado!' });
+        }
+    }
+
+    static async followingPosts(req, res) {
+        let token = getToken(req);
+        let user = await getUserByToken(token, res);
+
+        try {            
+            let following = await Connection.find({ followerId: user._id.toString() });
+            following = following.map(following => following.followedId);
+            
+            let posts = await Project.find({ devId: { $in: following }});
+
+            return res.status(200).json({ 
+                message: 'Projetos de quem você segue', 
+                projects: posts,
+                total: posts.length,
+            });
+        } catch (error) {
             return res.status(422).json({ message: 'Algo deu errado!' });
         }
     }

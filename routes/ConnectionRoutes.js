@@ -12,6 +12,8 @@ router.get("/:username/followers", controller.followers);
 
 router.get("/:username/following", controller.following);
 
+router.get("/following/posts", verifyToken, controller.followingPosts);
+
 //POST
 router.post('/follow', [
     body('followedId').notEmpty(),
