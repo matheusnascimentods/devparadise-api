@@ -54,6 +54,26 @@ module.exports = class ProjectController {
     static async get(req, res) {
         let { q, id, author } = req.query;
 
+        if (q && author) {
+            let user = await User.findOne({ username: author });
+
+            if (!user) {
+                return res.status(404).json({ message: "Usuario não encontrado!" }); 
+            }
+
+            let projects = await Project.find({
+                devId: user._id.toString(),
+                $or: [
+                    { title: { $regex: q, $options: 'i' } },
+                    { description: { $regex: q, $options: 'i' } },
+                    { devUsername: { $regex: q, $options: 'i' } },
+                    { technologies: { $in: [q] }}
+                ]
+            }).sort('-createdAt');
+
+            return res.status(200).json({ message: `Projetos de ${user.username}`, projects: projects, user: user, total: projects.length });
+        }
+
         if (q) {
             let data = await Project.find({
                 $or: [
