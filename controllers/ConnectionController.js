@@ -6,7 +6,6 @@ const User = require("../models/User");
 
 module.exports = class ConnectionController {
     static async follow(req, res) {
-
         let token = getToken(req);
         let user = await getUserByToken(token, res);
         
@@ -16,6 +15,10 @@ module.exports = class ConnectionController {
 
         if (!followed) {
             return res.status(422).json({ message: 'Usuário não encontrado! '});
+        }
+
+        if(user._id.toString() == followed._id.toString()){
+            return res.status(422).json({ message: 'Você não pode seguir a si mesmo!'});
         }
 
         let alreadyFollows = await Connection.findOne({ 

@@ -7,7 +7,6 @@ const Project = require('../models/Project');
 const createUserToken = require('../helpers/create-user-token');
 const getToken = require('../helpers/get-token');
 const getUserByToken = require('../helpers/get-user-by-token');
-const Connection = require("../models/Connection");
 const getTotalConnections = require('../helpers/get-total-connections');
 
 module.exports = class UserController {
@@ -94,7 +93,7 @@ module.exports = class UserController {
                 ]
             }).sort('-createdAt');
 
-            return res.status(200).json({ data: users, total: users.length });            
+            return res.status(200).json({ message: `Todos os resultados para ${q}`, users: users, total: users.length });            
         }
 
         if (username) {
@@ -108,7 +107,7 @@ module.exports = class UserController {
 
             let totalConnections = await getTotalConnections(user);
 
-            return res.status(200).json({ data: user, projects: projects, following: totalConnections.following, followers: totalConnections.followers }); 
+            return res.status(200).json({ message: `Dados do usuario ${username}`, user: user, projects: projects, following: totalConnections.following, followers: totalConnections.followers }); 
         }
 
         if (id) {
@@ -122,11 +121,11 @@ module.exports = class UserController {
 
             let totalConnections = await getTotalConnections(user);
 
-            return res.status(200).json({ data: user, projects: { projects: projects, total: projects.length }, following: totalConnections.following, followers: totalConnections.followers });  
+            return res.status(200).json({ message: `Dados do usuario de _id ${id}`, user: user, projects: { projects: projects, total: projects.length }, following: totalConnections.following, followers: totalConnections.followers });  
         }
 
         let users = await User.find().sort('-createdAt');
-        return res.status(200).json({ data: users, total: users.length });
+        return res.status(200).json({ message: "Todos os usuarios", users: users, total: users.length });
     }
 
     static async getCurrentUser (req, res) {
@@ -142,7 +141,7 @@ module.exports = class UserController {
 
         let totalConnections = await getTotalConnections(user);
 
-        return res.json({ dev: user, projects: projects, following: totalConnections.following, followers: totalConnections.followers })
+        return res.json({ message: `Dados do usuario atual`, user: user, projects: projects, following: totalConnections.following, followers: totalConnections.followers })
     }
 
     static async edit(req, res) {
@@ -208,7 +207,7 @@ module.exports = class UserController {
 
             updatedData.password = undefined;
 
-            return res.json({ message: 'Operação realizada com sucesso!', data: updatedData });
+            return res.json({ message: 'Operação realizada com sucesso!', user: updatedData });
         } catch (error) {
             return res.status(500).json({ message: error})
         }
@@ -243,7 +242,7 @@ module.exports = class UserController {
 
         await User.findByIdAndUpdate(user._id, user);
 
-        return res.status(204).json({ data: 'Operação realizada com sucesso!'});
+        return res.status(204).json({ message: 'Operação realizada com sucesso!'});
     }
 
     static async delete(req, res) {

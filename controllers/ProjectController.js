@@ -8,7 +8,6 @@ const getToken = require('../helpers/get-token');
 const getUserByToken = require('../helpers/get-user-by-token');
 
 module.exports = class ProjectController {
-
     static async publish(req, res) {
         let {title, description, repository, link, technologies} = req.body;
         let files = req.files;
@@ -44,7 +43,7 @@ module.exports = class ProjectController {
 
         try {
             let data = await project.save();
-            return res.status(201).json({ data: data });
+            return res.status(201).json({ message: `O projeto ${data.title} foi adicionado ao seu perfil!`, project: data });
         } 
         catch (error) {
             res.status(500).json({ message: error });
@@ -71,7 +70,7 @@ module.exports = class ProjectController {
                 ]
             }).sort('-createdAt');
 
-            return res.status(200).json({ message: `Projetos de ${user.username}`, projects: projects, user: user, total: projects.length });
+            return res.status(200).json({ message: `Resultados para ${q} feitos por ${author}`, projects: projects, user: user, total: projects.length });
         }
 
         if (q) {
@@ -84,7 +83,7 @@ module.exports = class ProjectController {
                 ]
             }).sort('-createdAt');
 
-            return res.status(200).json({ data: data, total: data.length });         
+            return res.status(200).json({ message: `Todos os resultados para ${q}`, projects: data, total: data.length });         
         }
 
         if (id) {
@@ -96,7 +95,7 @@ module.exports = class ProjectController {
 
             let user = await User.findOne({ _id: data.devId });
 
-            return res.status(200).json({ data: data, user: user }); 
+            return res.status(200).json({ message: `Tudo sobre o projeto ${data.title}`, project: data, user: user }); 
         }
 
         if (author) {
@@ -113,7 +112,7 @@ module.exports = class ProjectController {
         }
 
         let data = await Project.find().sort('-createdAt');
-        return res.status(200).json({ data: data, total: data.length });
+        return res.status(200).json({ message: "Todos os projetos", projects: data, total: data.length });
     }
 
     static async myProjects(req, res) {
@@ -136,12 +135,12 @@ module.exports = class ProjectController {
                 ]
             }).sort({ favorite: 1 });
 
-            return res.status(200).json({ data: data, total: data.length });     
+            return res.status(200).json({ message: `Todos os resultados para ${q}`, projects: data, total: data.length });     
         }
 
         let projects = await Project.find({ devId: user._id.toString() }).sort({ favorite: -1 });
 
-        return res.json({ devId: user._id.toString(), projects: projects, total: projects.length})
+        return res.json({ message: "Todos os seus projetos", user: user, projects: projects, total: projects.length})
     }
 
     static async update(req, res) {
