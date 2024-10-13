@@ -103,7 +103,7 @@ module.exports = class UserController {
                 return res.status(404).json({ message: "Usuario não encontrado" }); 
             }
 
-            let projects = await Project.find({ devId: user._id.toString() });
+            let projects = await Project.find({ devId: user._id.toString() }).sort({ favorite: -1 });
 
             let totalConnections = await getTotalConnections(user);
 
@@ -117,7 +117,7 @@ module.exports = class UserController {
                 return res.status(404).json({ message: 'Nenhum usuário encontrado.' });
             }
 
-            let projects = await Project.find({ devId: user._id.toString() });
+            let projects = await Project.find({ devId: user._id.toString() }).sort({ favorite: -1 });
 
             let totalConnections = await getTotalConnections(user);
 
