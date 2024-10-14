@@ -87,10 +87,15 @@ module.exports = class ProjectController {
         }
 
         if (id) {
+            
+            if(!ObjectId.isValid(id)) {
+                return res.status(422).json({ message: 'Id invalído' });
+            }
+
             let data = await Project.findOne({ _id: id });
 
             if (!data) {
-                return res.status(404).message({ message: 'Este projeto não existe' });
+                return res.status(404).json({ message: 'Este projeto não existe' });
             }
 
             let user = await User.findOne({ _id: data.devId });
@@ -119,7 +124,7 @@ module.exports = class ProjectController {
         let token = getToken(req);
         let user = await getUserByToken(token, res);
 
-        let q = req.query.q;
+        let {q, id} = req.query;
 
         if(q) {
             let data = await Project.find({
@@ -136,6 +141,20 @@ module.exports = class ProjectController {
             }).sort({ favorite: 1 });
 
             return res.status(200).json({ message: `Todos os resultados para ${q}`, projects: data, total: data.length });     
+        }
+
+        if (id) {
+            if(!ObjectId.isValid(id)) {
+                return res.status(422).json({ message: 'Id invalído' });
+            }
+
+            let data = await Project.findOne({ _id: id, devId: user._id.toString() });
+
+            if (!data) {
+                return res.status(404).json({ message: 'Este projeto não existe' });
+            }
+
+            return res.status(200).json({ message: `Tudo sobre o projeto ${data.title}`, project: data, user: user }); 
         }
 
         let projects = await Project.find({ devId: user._id.toString() }).sort({ favorite: -1 });
