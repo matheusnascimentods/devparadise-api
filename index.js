@@ -11,22 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 //CORS
-const allowedOrigins = [
-    process.env.VERCEL_URL,
-];
-
-app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
-
-app.use(cors({
-    origin: function (origin, callback) {
-      // Permite origens específicas
-      if (allowedOrigins.includes(origin) || !origin) {
-        callback(null, true);
-      } else {
-        callback(console.error('Not allowed by CORS'));
-      }
-    }
-}));
+app.use(cors({ credentials: true, origin: process.env.FRONT_URL }));
 
 //Folder for images
 app.use(express.static('public'));
