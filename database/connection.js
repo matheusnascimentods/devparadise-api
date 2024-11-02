@@ -1,7 +1,13 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 async function main() {
-    await mongoose.connect('mongodb://0.0.0.0:27017/devparadise');
+    const uri = process.env.MONGO_URI;
+
+    await mongoose.connect(
+        uri,
+        { useNewUrlParser: true, useUnifiedTopology: true },
+    );
     console.log('Database connection successful');
 }
 

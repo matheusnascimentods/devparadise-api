@@ -17,8 +17,8 @@ app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
 //Folder for images
 app.use(express.static('public'));
 
-//Logs
-app.use(showLogs);
+// //Logs
+// app.use(showLogs);
 
 //Routes
 const UserRoutes = require('./routes/UserRoutes');
