@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const showLogs = require('./helpers/show-logs');
 
 const port = process.env.API_PORT;
 const app = express();
@@ -16,9 +15,6 @@ app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
 
 //Folder for images
 app.use(express.static('public'));
-
-// //Logs
-// app.use(showLogs);
 
 //Routes
 const UserRoutes = require('./routes/UserRoutes');
