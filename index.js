@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
+const path = require('path');
 
 const port = process.env.API_PORT;
 const app = express();
@@ -14,7 +15,7 @@ app.use(bodyParser.json());
 app.use(cors({ credentials: true, origin: process.env.FRONT_URL }));
 
 //Folder for images
-app.use(express.static('public'));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 //Routes
 const UserRoutes = require('./routes/UserRoutes');
