@@ -12,7 +12,10 @@ const getTotalConnections = require('../helpers/get-total-connections');
 module.exports = class UserController {
 
     static async signup(req, res) {
-        let {name, username, email, cpf, phone, description, skils, password} = req.body;
+        let {name, username, email, cpf, description, skils, password} = req.body;
+
+        console.log(name, username, email, cpf, description, skils, password);
+        
 
         //Check if user exists
         let cpfExists = await User.findOne({ cpf: cpf});
@@ -43,7 +46,6 @@ module.exports = class UserController {
             email: email, 
             skils: skils,
             cpf: cpf,
-            phone: phone,
             description: description,
             password: passwordHash,
         });
@@ -59,6 +61,9 @@ module.exports = class UserController {
     static async login(req, res) {''
           
         let {login, password} = req.body;
+
+        console.log(login, password);
+        
 
         let user = await User.findOne({
             $or: [
@@ -145,7 +150,7 @@ module.exports = class UserController {
     }
 
     static async edit(req, res) {
-        let { name, username, email, phone, description, skils, github, linkedin } = req.body;
+        let { name, username, email, description, skils, github, linkedin } = req.body;
         
         let token = getToken(req);        
         let user = await getUserByToken(token, res);
@@ -191,7 +196,6 @@ module.exports = class UserController {
         user.email = email;
         user.description = description;
         user.skils = skils;
-        user.phone = phone;
         user.github = github;
         user.linkedin = linkedin;
         user.image = image;

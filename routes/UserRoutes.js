@@ -11,7 +11,6 @@ router.post('/signup', [
     body('name').notEmpty(),
     body('description').notEmpty(),
     body('username').isLength({ min: 5 }).trim().escape(),
-    body('phone').isMobilePhone(),
     body('email').isEmail().normalizeEmail(),
     body('cpf').isLength({ min: 11}),
     body('password').isLength({ min: 6 }),

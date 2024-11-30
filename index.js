@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(cors({ credentials: true, origin: process.env.FRONT_URL }));
 
 //Folder for images
-app.use('/public', express.static('public'));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 //Routes
 const UserRoutes = require('./routes/UserRoutes');
