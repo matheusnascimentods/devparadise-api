@@ -1,271 +1,274 @@
+# 🌴 DevParadise API — Rede de Portfólios para Devs Iniciantes
 
-### Devparadise API
+![Node.js](https://img.shields.io/badge/Node.js-20+-68A063?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.x-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)
 
-A DevParadise API é uma API RESTful desenvolvida em JavaScript utilizando o framework A DevParadise API é parte do projeto de TCC do curso técnico de Desenvolvimento de Sistemas da ETEC Professor Camargo Aranha. Ela fornece os serviços essenciais para o funcionamento do DevParadise, uma plataforma web criada para conectar desenvolvedores iniciantes ao mercado de trabalho, promovendo visibilidade, networking e aprendizado contínuo.
+> Perfis, projetos e conexões para que desenvolvedores iniciantes mostrem seu trabalho e façam networking.
 
-Essa API foi desenvolvida com foco em flexibilidade, escalabilidade e facilidade de uso, utilizando tecnologias modernas como Express e MongoDB.
-#### Requisitos/dependências
-- Nodejs >= 20 (LTS version) 
-- MongoDB
+A **DevParadise API** é a API RESTful do TCC do curso técnico de Desenvolvimento de Sistemas da **ETEC Professor Camargo Aranha**. Desenvolvida em **Node.js** com **Express** e **MongoDB**, ela sustenta o [DevParadise](https://github.com/matheusnascimentods/devparadise-app), uma plataforma que conecta desenvolvedores iniciantes ao mercado de trabalho: cada dev cria um perfil, publica projetos com imagens, segue outros devs e acompanha o que eles publicam. A autenticação é feita com **JWT** e as senhas são armazenadas com **bcrypt**.
 
-#### Rodando
-Na raiz do projeto, execute o seguinte comando para realizar a configuração do projeto:
-```ruby
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Desenvolvedor
+    participant API as Express (Routes)
+    participant Auth as check-token (JWT)
+    participant Ctrl as Controllers
+    participant DB as MongoDB
+
+    Dev->>API: POST /user/signup
+    API->>Ctrl: UserController.signup
+    Ctrl->>DB: CPF, email e username livres?
+    Ctrl->>DB: Salvar User (senha com bcrypt)
+    API-->>Dev: 200 OK (token JWT)
+
+    Dev->>API: POST /project (form-data + imagens)
+    API->>Auth: Validar Bearer Token
+    Auth->>Ctrl: ProjectController.publish
+    Ctrl->>DB: Salvar Project (imagens em public/images/projects)
+    API-->>Dev: 201 Created (projeto publicado)
+
+    Dev->>API: POST /connection/follow
+    API->>Auth: Validar Bearer Token
+    Auth->>Ctrl: ConnectionController.follow
+    Ctrl->>DB: Salvar Connection
+    API-->>Dev: 201 Created
+
+    Dev->>API: GET /connection/following/posts
+    Ctrl->>DB: Projetos de quem o dev segue
+    API-->>Dev: 200 OK (feed)
+```
+
+---
+
+## ✨ O Problema
+Desenvolvedores iniciantes têm dificuldade para entrar no mercado:
+- **Pouca visibilidade**: Projetos ficam espalhados em repositórios sem contexto.
+- **Falta de networking**: Não há um espaço focado em quem está começando.
+- **Portfólio difícil de montar**: Criar e manter um site próprio exige tempo e conhecimento.
+
+---
+
+## 🚀 A Solução
+- **Perfis de desenvolvedor**: Nome, descrição, habilidades, GitHub, LinkedIn e foto.
+- **Publicação de projetos**: Título, descrição, tecnologias, repositório, link e imagens, com destaque para os favoritos.
+- **Conexões**: Seguir e deixar de seguir devs, ver seguidores e seguidos.
+- **Feed**: Projetos publicados por quem o dev segue.
+- **Busca**: Pesquisa de usuários e projetos por texto.
+
+---
+
+## 🎯 Diferenciais
+- **Login flexível**: O dev entra com username **ou** email.
+- **Upload de imagens**: Multer grava as imagens em `public/images`, servidas estaticamente pela própria API.
+- **Validação de entrada**: `express-validator` nas rotas de cadastro, login, troca de senha e follow.
+- **Exclusão segura**: Excluir a conta exige a senha atual.
+
+---
+
+## 🛠️ Stack Tecnológica
+
+| Camada | Tecnologia |
+|---|---|
+| **Runtime** | Node.js 20+ (LTS) |
+| **Framework** | Express 4 |
+| **Banco de Dados** | MongoDB com Mongoose 8 |
+| **Autenticação** | JSON Web Token (`jsonwebtoken`) |
+| **Hash de Senhas** | bcrypt |
+| **Upload de Arquivos** | Multer |
+| **Validação** | express-validator, email-validator |
+| **Dev Server** | nodemon |
+
+---
+
+## 🏛️ Arquitetura
+
+```
+routes        ← Definição das rotas, validação e middlewares (token, id, upload)
+   ↓
+controllers   ← Regras de negócio (UserController, ProjectController, ConnectionController)
+   ↓
+models        ← Schemas Mongoose (User, Project, Connection)
+   ↓
+database      ← Conexão com o MongoDB
+```
+
+`helpers/` concentra os middlewares e utilitários compartilhados: geração e verificação de token, busca do usuário pelo token, validação de body e id, upload de imagens e contagem de conexões.
+
+### Principais Entidades
+- **`User`**: Nome, username, email, CPF, descrição, skills, GitHub, LinkedIn, imagem e senha (hash).
+- **`Project`**: Título, descrição, tecnologias, repositório, link, imagens, autor (`devId`/`devUsername`) e flag `favorite`.
+- **`Connection`**: Relação `followerId` → `followedId` entre dois usuários.
+
+---
+
+## 📁 Estrutura do Projeto
+
+```text
+devparadise-api/
+├── index.js                     # Bootstrap do Express, CORS, estáticos e rotas
+├── controllers/                 # Regras de negócio
+├── database/connection.js       # Conexão Mongoose
+├── helpers/                     # Middlewares e utilitários
+├── models/                      # Schemas Mongoose
+├── public/images/               # Imagens enviadas (users/ e projects/)
+├── routes/                      # Rotas de user, project e connection
+└── package.json
+```
+
+---
+
+## ⚡ Quick Start
+
+### Pré-requisitos
+- [Node.js 20+](https://nodejs.org/) instalado
+- Uma instância do [MongoDB](https://www.mongodb.com/) (local ou Atlas)
+
+### 1. Clonar o repositório
+```bash
+git clone https://github.com/matheusnascimentods/devparadise-api.git
+cd devparadise-api
+```
+
+### 2. Instalar as dependências
+```bash
 npm install
 ```
-Em seguida será necessário criar um arquivo `.env` na raiz do projeto, fica abaixo um exemplo de como deve ser o arquivo:
-```ruby
-PORT=300
-MONGO_URI='minhauridomongodb'
-FRONT_URL='urldofrontend'
+
+### 3. Configurar o ambiente
+Crie um arquivo `.env` na raiz do projeto:
+```env
+API_PORT=3000
+MONGO_URI=mongodb://localhost:27017/devparadise
+FRONT_URL=http://localhost:5173
 ```
 
-`PORT`, é a porta onde a API vai rodar, `MONGO_URI` é a uri da base de dados no MongoDB, `FRONT_URL` é a url do front ent (caso você esteja rodando localmente essa url será `http://localhost:5173`)
-
-Agora basta rodar:
-```ruby
+### 4. Executar a Aplicação
+```bash
 npm run dev
 ```
-e API estará rodando na sua maquina
-## Endpoints
 
-**API_URL**: `http://localhost:3000`
+A API estará disponível em: **`http://localhost:3000`**
 
-#### Endpinsts referentes a usuários
+---
 
-`POST` **Criar user**
-```Ruby
-http://localhost:3000/user/signup
+## 💻 Comandos Úteis de Desenvolvimento
+
+```bash
+# Rodar em modo de desenvolvimento (reinicia a cada alteração)
+npm run dev
+
+# Rodar em modo normal
+npm start
 ```
-```Ruby
+
+---
+
+## 🔌 API Reference
+
+Rotas marcadas com 🔒 exigem o header `Authorization: Bearer <token>`.
+
+### 👤 Usuários (`/user`)
+| Método | Rota | Descrição | Acesso |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/user/signup` | Cria um usuário e devolve o token | Público |
+| `POST` | `/user/login` | Login com `login` (username ou email) e `password` | Público |
+| `GET` | `/user` | Lista usuários; aceita `?q=` (busca), `?username=` ou `?id=` | Público |
+| `GET` | `/user/me` | Dados, projetos e conexões do usuário autenticado | 🔒 |
+| `PATCH` | `/user` | Edita o perfil (form-data, campo `image` para a foto) | 🔒 |
+| `PATCH` | `/user/change-password` | Troca a senha (`password`, `newPassword`, `confirmPassword`) | 🔒 |
+| `DELETE` | `/user` | Exclui a conta (exige `password` no corpo) | 🔒 |
+
+Corpo de `POST /user/signup`:
+```json
 {
-    "name": "",
-    "username": "",
-    "email": "",
-    "skils": [],
-    "cpf": "",
-    "phone": "",
-    "description": "",
-    "password": "123456"
+  "name": "Ada Lovelace",
+  "username": "adalovelace",
+  "email": "ada@example.com",
+  "cpf": "12345678901",
+  "phone": "11999999999",
+  "description": "Dev front-end em formação",
+  "skils": ["JavaScript", "React"],
+  "password": "123456"
 }
 ```
+`username` precisa de pelo menos 5 caracteres, `cpf` de 11 e `password` de 6. CPF, email e username devem ser únicos.
 
-`POST` **Login**
-```Ruby
-http://localhost:3000/user/login
-```
-```Ruby
-{
-    "login": "",
-    "password": ""
-}
-```
-**Obs:** Login é o username ou email do user
+### 🗂️ Projetos (`/project`)
+| Método | Rota | Descrição | Acesso |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/project` | Publica um projeto (form-data, campo `images` para as imagens) | 🔒 |
+| `GET` | `/project` | Lista projetos; aceita `?q=`, `?id=` ou `?author=` | Público |
+| `GET` | `/project/me` | Projetos do usuário autenticado | 🔒 |
+| `PATCH` | `/project/favorite` | Marca/desmarca um projeto como favorito (`id` no corpo) | 🔒 |
+| `PATCH` | `/project/:id` | Edita um projeto (form-data) | 🔒 |
+| `DELETE` | `/project/:id` | Exclui um projeto | 🔒 |
 
-`GET` **Buscar todos os users**
-```Ruby
-http://localhost:3000/user
-```
+Campos de `POST` e `PATCH /project/:id`:
 
-`GET` **Buscar user autenticado**
-```Ruby
-http://localhost:3000/user/me
-```
-**Authorization Bearer Token**
-```Ruby
-Token:<token>
-```
+| Campo | Tipo | Obrigatório |
+| :--- | :--- | :--- |
+| `title` | String | Sim |
+| `description` | String | Sim |
+| `technologies` | Array | Sim |
+| `repository` | String (URL) | Não |
+| `link` | String (URL) | Não |
+| `images` | Arquivos PNG/JPG/JPEG/JFIF | Não |
 
-`PATCH` **Atualizar user**
-```Ruby
-http://localhost:3000/user
-```
-| Campo        | Tipo       | Obrigatório | Descrição                                              |
-|--------------|------------|-------------|------------------------------------------------------|
-| `name`       | String     | Sim         | Nome completo do usuário.                           |
-| `username`   | String     | Sim         | Nome de usuário único para o perfil.                |
-| `email`      | String     | Sim         | Endereço de email válido do usuário.                |
-| `description`| String     | Não         | Breve descrição ou biografia do usuário.            |
-| `skills`     | Array      | Não         | Lista de habilidades ou tecnologias do usuário.      |
-| `github`     | String     | Não         | URL do perfil no GitHub.                            |
-| `linkedin`   | String     | Não         | URL do perfil no LinkedIn.                          |
-| `image`      | File (PNG/JPG) | Não      | Imagem de perfil do usuário (PNG ou JPG).           |
+### 🔗 Conexões (`/connection`)
+| Método | Rota | Descrição | Acesso |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/connection/follow` | Segue um usuário (`followedId` no corpo) | 🔒 |
+| `DELETE` | `/connection/unfollow` | Deixa de seguir um usuário (`followedId` no corpo) | 🔒 |
+| `GET` | `/connection/:username/status` | Indica se o usuário autenticado segue `:username` | 🔒 |
+| `GET` | `/connection/:username/followers` | Seguidores de `:username` (aceita `?q=`) | Público |
+| `GET` | `/connection/:username/following` | Quem `:username` segue (aceita `?q=`) | Público |
+| `GET` | `/connection/following/posts` | Feed com os projetos de quem o usuário autenticado segue | 🔒 |
 
-**Obs:** Essa rota usa um form-data
+### 🖼️ Arquivos estáticos
+As imagens enviadas ficam acessíveis em `/public/images/users/<arquivo>` e `/public/images/projects/<arquivo>`.
 
-**Authorization Bearer Token**
-```Ruby
-Token:<token>
-```
+---
 
-`PATCH` **Trocar senha**
-```Ruby
-http://localhost:3000/user/change-password
-```
-```Ruby
-{
-    "password": "",
-    "newPassword": "",
-    "confirmPassword": ""
-}
-```
-**Authorization Bearer Token**
-```Ruby
-Token:<token>
-```
+## 🗂️ Variáveis de Ambiente & Configuração
 
-`DELETE` **Excluir user**
-```Ruby
-http://localhost:3000/user/
-```
-```Ruby
-{
-    "password": ""
-}
-```
-**Authorization Bearer Token**
-```Ruby
-Token:<token>
-```
+| Variável de Ambiente | Descrição | Exemplo (Local) |
+| :--- | :--- | :--- |
+| `API_PORT` | Porta de execução da API | `3000` |
+| `MONGO_URI` | URI de conexão com o MongoDB | `mongodb://localhost:27017/devparadise` |
+| `FRONT_URL` | Origem permitida pelo CORS (frontend) | `http://localhost:5173` |
 
-#### Endpinsts referentes a projetos
+O arquivo `.env` não é versionado; cada ambiente deve fornecer os próprios valores.
 
-`POST` **Criar projeto**
-```Ruby
-http://localhost:3000/project
-```
-| Campo         | Tipo           | Obrigatório | Descrição                                              |
-|---------------|----------------|-------------|------------------------------------------------------|
-| `title`       | String         | Sim         | Título do projeto.                                   |
-| `description` | String         | Sim         | Breve descrição ou resumo do projeto.               |
-| `repository`  | String (URL)   | Não         | URL do repositório do projeto (ex.: GitHub).        |
-| `link`        | String (URL)   | Não         | URL do site ou demonstração do projeto.             |
-| `technologies`| Array          | Sim         | Lista de tecnologias utilizadas no projeto.         |
-| `images`      | File (PNG/JPG) | Não         | Imagens representando o projeto (PNG ou JPG).       |
+---
 
-**Obs:** Essa rota usa um form-data
+## 🔒 Segurança & Boas Práticas
 
-**Authorization Bearer Token**
-```Ruby
-Token:<token>
-```
+- **Autenticação Stateless**: Tokens JWT carregando `name` e `id` do usuário.
+- **Senhas com hash**: Armazenadas com bcrypt; a troca e a exclusão de conta exigem a senha atual.
+- **CORS restrito**: Apenas a origem definida em `FRONT_URL` é aceita.
+- **Upload filtrado**: Só são aceitas imagens PNG, JPG, JPEG e JFIF.
+- **Ponto de atenção**: O segredo de assinatura do JWT está fixo no código (`helpers/create-user-token.js` e `helpers/check-token.js`). Antes de qualquer deploy, mova-o para uma variável de ambiente.
 
-`GET` **Buscar projetos do user autenticado**
-```Ruby
-http://localhost:3000/project/me
-```
-**Authorization Bearer Token**
-```Ruby
-Token:<token>
-```
+---
 
-`GET` **Buscar todos os projetos**
-```Ruby
-http://localhost:3000/project
-```
+## 🤝 Contribuindo
 
-`PATCH` **Favoritar projeto**
-```Ruby
-http://localhost:3000/project/favorite
-```
-```Ruby
-{
-    id: ""
-}
-```
-**Authorization Bearer Token**
-```Ruby
-Token:<token>
-```
+1. Faça um Fork do projeto
+2. Crie uma branch para a sua funcionalidade (`git checkout -b feature/nome-da-feature`)
+3. Faça o commit das suas alterações (`git commit -m 'feat: implementa nova funcionalidade'`)
+4. Envie para o repositório remoto (`git push origin feature/nome-da-feature`)
+5. Abra um **Pull Request** detalhando as alterações
 
-`PATCH` **Editar projeto**
-```Ruby
-http://localhost:3000/project/:id
-```
-| Campo         | Tipo           | Obrigatório | Descrição                                              |
-|---------------|----------------|-------------|------------------------------------------------------|
-| `title`       | String         | Sim         | Título do projeto.                                   |
-| `description` | String         | Sim         | Breve descrição ou resumo do projeto.               |
-| `repository`  | String (URL)   | Não         | URL do repositório do projeto (ex.: GitHub).        |
-| `link`        | String (URL)   | Não         | URL do site ou demonstração do projeto.             |
-| `technologies`| Array          | Sim         | Lista de tecnologias utilizadas no projeto.         |
-| `images`      | File (PNG/JPG) | Não         | Imagens representando o projeto (PNG ou JPG).       |
+---
 
-**Authorization Bearer Token**
-```Ruby
-Token:<token>
-```
-**Obs:** `:id` Deve ser substituido pelo id do projeto, e essa rota usa um form-data
+## 📄 Licença
 
-`DELETE` **Excluir projeto**
-```Ruby
-http://localhost:3000/project/:id
-```
-**Authorization Bearer Token**
-```Ruby
-Token:<token>
-```
-**Obs:** `:id` Deve ser substituido pelo id do projeto
+Distribuído sob a licença MIT. Veja [`LICENSE.txt`](LICENSE.txt) para mais detalhes.
 
-#### Endpinsts referentes a conexões
-
-`POST` **Seguir um user**
-```Ruby
-http://localhost:3000/connection/follow
-```
-```Ruby
-{
-    followedId: ""
-}
-```
-```Ruby
-Token:<token>
-```
-
-`GET` **Ver se o user autenticado segue o user X**
-```Ruby
-http://localhost:3000/connection/:username/status
-```
-```Ruby
-Token:<token>
-```
-**Obs:** `:username` Deve ser substituido pelo username do user X 
-
-`GET` **Ver todos os seguidores do user X**
-```Ruby
-http://localhost:3000/connection/:username/followers
-```
-
-**Obs:** `:username` Deve ser substituido pelo username do user X
-
-`GET` **Ver quem o user X segue**
-```Ruby
-http://localhost:3000/connection/:username/following
-```
-
-**Obs:** `:username` Deve ser substituido pelo username do user X
-
-`GET` **Ver os projetos de quem o user autenticado segue**
-```Ruby
-http://localhost:3000/connection/following/posts
-```
-```Ruby
-Token:<token>
-```
-`DELETE` **Deixar de seguir um user**
-```Ruby
-http://localhost:3000/connection/unfollow
-```
-```Ruby
-{
-    followedId: ""
-}
-```
-```Ruby
-Token:<token>
-```
-## Stack utilizada
-
-- Node
-- Express
-
+---
+Feito com ❤️ por [@matheusnascimentods](https://github.com/matheusnascimentods)
