@@ -9,7 +9,7 @@
 
 > Perfis, projetos e conexões para que desenvolvedores iniciantes mostrem seu trabalho e façam networking.
 
-A **DevParadise API** é a API RESTful do TCC do curso técnico de Desenvolvimento de Sistemas da **ETEC Professor Camargo Aranha**. Desenvolvida em **Node.js** com **Express** e **MongoDB**, ela sustenta o [DevParadise](https://github.com/matheusnascimentods/devparadise-app), uma plataforma que conecta desenvolvedores iniciantes ao mercado de trabalho: cada dev cria um perfil, publica projetos com imagens, segue outros devs e acompanha o que eles publicam. A autenticação é feita com **JWT** e as senhas são armazenadas com **bcrypt**.
+A **DevParadise API** é a API RESTful do TCC do curso técnico de Desenvolvimento de Sistemas da **ETEC Professor Camargo Aranha**. Desenvolvida em **Node.js** com **Express** e **MongoDB**, ela sustenta o [DevParadise](https://github.com/matheusnascimentods/devparadise-web), uma plataforma que conecta desenvolvedores iniciantes ao mercado de trabalho: cada dev cria um perfil, publica projetos com imagens, segue outros devs e acompanha o que eles publicam. A autenticação é feita com **JWT** e as senhas são armazenadas com **bcrypt**.
 
 ```mermaid
 sequenceDiagram
